@@ -12,6 +12,10 @@
 
 This project is a [React](https://reactjs.org/) application built with [TypeScript](https://www.typescriptlang.org/) using [Vite](https://vitejs.dev/) as the build tool.
 
+## Live Link
+
+- [https://cocobod.ebiashara.com/](https://cocobod.ebiashara.com/)
+
 ## Requirements
 
 - [Node.js](https://nodejs.org/) (version 16 or higher)
