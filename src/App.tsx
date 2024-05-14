@@ -57,10 +57,10 @@ function App() {
     const [ownerDescription, setOwnerDescription] = useState('');
     const [ownerComment, setOwnerComment] = useState('');
     const [ownerCode, setOwnerCode] = useState('');
-    const [serializeCodes, setSerializeCodes] = useState<boolean>();
+    const [serializeCodes, setSerializeCodes] = useState<string>('');
     const [allowIncidentTracking, setAllowIncidentTracking] =
-      useState<boolean>();
-    const [batchCodeLength, setBatchCodeLength] = useState<number>();
+      useState<string>('');
+    const [batchCodeLength, setBatchCodeLength] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(false);
 
     const toast = useToast();
@@ -80,9 +80,12 @@ function App() {
           formData.append('ownerDescription', ownerDescription);
           formData.append('ownerComment', ownerComment);
           formData.append('ownerCode', ownerCode);
-          formData.append('serializeCodes', serializeCodes);
-          formData.append('allowIncidentTracking', allowIncidentTracking);
-          formData.append('batchCodeLength', batchCodeLength);
+          formData.append('serializeCodes', String(serializeCodes));
+          formData.append(
+            'allowIncidentTracking',
+            String(allowIncidentTracking),
+          );
+          formData.append('batchCodeLength', String(batchCodeLength));
           const response = await fetch(
             `${apiBaseUrl}/api/v1/owner/create-owner/`,
             {
@@ -212,7 +215,7 @@ function App() {
           <FormLabel>Serialize Codes</FormLabel>
           <Select
             placeholder='Select option'
-            value={serializeCodes}
+            value={serializeCodes || ''}
             onChange={(ev) => setSerializeCodes(ev.currentTarget.value)}
             mb={3}
           >
@@ -249,12 +252,12 @@ function App() {
             w='70vh'
             bg='green.500'
             _hover={{
-              background: 'green.500',
+              background: 'yellow.500',
             }}
           >
             {isLoading ? (
               <>
-                <Spinner />
+                <Spinner color='yellow.500' />
               </>
             ) : (
               'Submit'
@@ -266,9 +269,27 @@ function App() {
   };
 
   const ListAllOwners = () => {
-    const [ownerData, setOwnerData] = useState<[]>();
-    const [ownerDetails, setOwnerDetails] = useState<[]>();
-    const [expandedRow, setExpandedRow] = useState(null);
+    interface Owner {
+      owner_id: number;
+      owner_name: string;
+      owner_code: string;
+      batch_code_length: number;
+      owner_logo: string;
+      allow_incident_tracking: string;
+      include_district: string;
+      include_region: string;
+      owner_comment: string;
+      owner_description: string;
+      serialise_codes: string;
+    }
+
+    interface OwnerData {
+      message: Owner[];
+    }
+
+    const [ownerData, setOwnerData] = useState<OwnerData>();
+    const [ownerDetails, setOwnerDetails] = useState<[] | null>();
+    const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
     useEffect(() => {
       const fetchOwners = async () => {
@@ -295,7 +316,7 @@ function App() {
       fetchOwners();
     }, []);
 
-    const fetchOwnerDetails = async (ownerId) => {
+    const fetchOwnerDetails = async (ownerId: number) => {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(
@@ -316,7 +337,7 @@ function App() {
       }
     };
 
-    const handleToggleRow = async (ownerId) => {
+    const handleToggleRow = async (ownerId: number) => {
       if (expandedRow === ownerId) {
         setExpandedRow(null);
         setOwnerDetails(null);
@@ -328,7 +349,7 @@ function App() {
 
     return (
       <div style={{ height: '87.5vh' }}>
-        {console.log('Owner data:', ownerData?.message)}
+        {/* {console.log('Owner data:', ownerData?.message)} */}
         {ownerData ? (
           <>
             <TableContainer
@@ -433,7 +454,7 @@ function App() {
                               </Stack>
                             </CardBody>
                           ) : (
-                            <Spinner />
+                            <Spinner size='lg' color='green.500' />
                           )}
                         </Card>
                       )}
@@ -472,8 +493,14 @@ function App() {
             <SidebarWithHeader children={[<CreateNewOwner key='owner' />]} />
           }
         />
-        <Route path='/dashboard/settings' element={<SidebarWithHeader />} />
-        <Route path='/dashboard/profile' element={<SidebarWithHeader />} />
+        <Route
+          path='/dashboard/settings'
+          element={<SidebarWithHeader children={[]} />}
+        />
+        <Route
+          path='/dashboard/profile'
+          element={<SidebarWithHeader children={[]} />}
+        />
       </Routes>
     </Router>
   );

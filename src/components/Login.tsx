@@ -22,13 +22,8 @@ import { FaRegEye, FaRegEyeSlash, FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 import { apiBaseUrl } from '../core/environment';
-interface LoginProps {
-  checkAuth: (password?: string) => Promise<boolean>;
-  setAuthenticated: () => void;
-  parseError: (err: unknown) => string;
-}
 
-export const Login: React.FC<LoginProps> = () => {
+export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
