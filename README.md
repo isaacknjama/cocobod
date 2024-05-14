@@ -1,30 +1,70 @@
-# React + TypeScript + Vite
+# CocoBod Front-end
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Table of Contents
 
-Currently, two official plugins are available:
+- [About](#about)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## About
 
-## Expanding the ESLint configuration
+This project is a [React](https://reactjs.org/) application built with [TypeScript](https://www.typescriptlang.org/) using [Vite](https://vitejs.dev/) as the build tool.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Live Link
 
-- Configure the top-level `parserOptions` property like this:
+- [https://cocobod.ebiashara.com/](https://cocobod.ebiashara.com/)
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-};
+## Requirements
+
+- [Node.js](https://nodejs.org/) (version 16 or higher)
+- [npm](https://www.npmjs.com/)
+
+## Installation
+
+1. Fork the repository.
+2. Clone the repository:
+
+```bash
+git clone git@github.com:ebiashara/cocobod_frontend.git
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+3. Navigate to the project directory:
+
+```bash
+cd cocobod_frontend
+```
+
+4. Install dependencies:
+
+```bash
+npm install
+```
+
+## Usage
+
+1. Start the development server:
+
+```bash
+npm run dev
+```
+
+2. Open your browser and visit `http://localhost:5173` to view the app.
+
+## Contributing
+
+Contributions are welcome! Here's how you can contribute:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/new-feature`).
+3. Make your changes.
+4. Commit your changes using [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/):
+
+```bash
+git commit -m "feat: add new feature"
+# or other conventional commit types like fix:, chore:, etc.
+```
+
+5. Push to the branch (`git push origin feature/new-feature`).
+6. Create a new [Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) based on `staging` branch.
