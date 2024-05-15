@@ -55,11 +55,16 @@ export const ForgotPassword = () => {
         toast({
           title: `OTP sent successfully to ${email}`,
           status: 'success',
+          isClosable: true,
         });
         navigate('/verify-otp');
       } catch (err: unknown) {
         console.error({ err });
-        toast({ title: 'Error sending OTP!', status: 'error' });
+        toast({
+          title: 'Error sending OTP!',
+          status: 'error',
+          isClosable: true,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -87,7 +92,7 @@ export const ForgotPassword = () => {
               />
             </InputGroup>
             <Text style={{ marginBottom: '15px' }}>
-              <Link href='/login' color='orange.500'>
+              <Link href='/' color='orange.500'>
                 Sign in instead?
               </Link>
             </Text>
