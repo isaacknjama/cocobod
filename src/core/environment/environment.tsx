@@ -1,3 +1,3 @@
-const apiBaseUrl = 'http://cocobodtest.ebiashara.com';
+const apiBaseUrl = 'https://cocobodtest.ebiashara.com';
 
 export { apiBaseUrl };
