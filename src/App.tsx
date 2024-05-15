@@ -99,15 +99,23 @@ function App() {
           const data = await response.json();
           console.log(data);
           if (!response.ok) {
-            toast({ title: `${data.message}`, status: 'error' });
+            toast({
+              title: `${data.message}`,
+              status: 'error',
+              isClosable: true,
+            });
             throw new Error(data.detail);
           } else {
-            toast({ title: `${data.message}`, status: 'success' });
+            toast({
+              title: `${data.message}`,
+              status: 'success',
+              isClosable: true,
+            });
             navigate('/dashboard');
           }
         } catch (err: unknown) {
           console.error({ err });
-          toast({ title: `${err}`, status: 'error' });
+          toast({ title: `${err}`, status: 'error', isClosable: true });
         } finally {
           setIsLoading(false);
         }
@@ -230,8 +238,8 @@ function App() {
             onChange={(ev) => setAllowIncidentTracking(ev.currentTarget.value)}
             mb={3}
           >
-            <option>True</option>
-            <option>False</option>
+            <option value='true'>True</option>
+            <option value='false'>False</option>
           </Select>
 
           <FormLabel>Batch Code Length</FormLabel>
