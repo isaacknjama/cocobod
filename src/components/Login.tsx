@@ -53,14 +53,33 @@ export const Login: React.FC = () => {
           },
           body: JSON.stringify({ email, password }),
         });
+
         const data = await response.json();
-        console.log(data);
-        if (data.reset_initial_password === false) {
-          navigate('/change-password');
-        }
+        console.log('Login response data: ', data);
+
         if (!response.ok) {
-          toast({ title: `${data.message}`, status: 'error' });
+          toast({
+            title: `${data.message}`,
+            status: 'error',
+            isClosable: true,
+          });
           throw new Error(data.message || 'Login failed');
+        }
+
+        if (
+          data.access_token !== undefined &&
+          data.reset_initial_password === false
+        ) {
+          navigate('/change-password');
+        } else if (data.access_token !== undefined) {
+          toast({ title: 'Login successful', status: 'success' });
+          navigate('/dashboard');
+        } else {
+          toast({
+            title: data.error,
+            status: 'error',
+            isClosable: true,
+          });
         }
 
         if (rememberMe) {
@@ -72,20 +91,9 @@ export const Login: React.FC = () => {
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('Email', email);
         localStorage.setItem('role', data.role);
-
-        if (data.access_token !== undefined) {
-          toast({ title: 'Login successful', status: 'success' });
-          navigate('/dashboard');
-        } else {
-          toast({
-            title: 'Invalid credentials, please try again!',
-            status: 'error',
-          });
-        }
       } catch (err: unknown) {
         console.error({ err });
         setError('Invalid username of password');
-        toast({ title: 'Login failed', status: 'error' });
       } finally {
         setIsLoading(false);
       }
@@ -121,6 +129,7 @@ export const Login: React.FC = () => {
                 autoComplete='off'
                 onChange={(ev) => setEmail(ev.currentTarget.value)}
                 isRequired
+                focusBorderColor='#651b0f'
               />
               <InputRightElement>
                 <FaUser />
@@ -135,6 +144,7 @@ export const Login: React.FC = () => {
                 value={password}
                 onChange={(ev) => setPassword(ev.currentTarget.value)}
                 isRequired
+                focusBorderColor='#651b0f'
               />
               <InputRightElement onClick={() => setShowPassword(!showPassword)}>
                 {!showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
@@ -143,7 +153,7 @@ export const Login: React.FC = () => {
             <Stack direction='row' spacing={40}>
               <Checkbox
                 defaultChecked
-                colorScheme='yellow'
+                colorScheme='green'
                 isChecked={rememberMe}
                 onChange={() => setRememberMe(!rememberMe)}
               >
@@ -156,10 +166,11 @@ export const Login: React.FC = () => {
                   padding: '25px',
                   marginLeft: '282px',
                 }}
-                color='green.500'
+                color='green'
                 _hover={{
-                  color: 'green.500',
+                  color: 'green',
                 }}
+                aria-label='forgot- password'
                 // onClick={(e) => {
                 //   e.preventDefault();
                 //   setTimeout(() => {
@@ -183,7 +194,7 @@ export const Login: React.FC = () => {
             >
               {isLoading ? (
                 <>
-                  <Spinner />
+                  <Spinner size='lg' />
                 </>
               ) : (
                 'Login'

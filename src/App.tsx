@@ -180,7 +180,7 @@ function App() {
             type='text'
             value={firstName}
             onChange={(ev) => setFirstName(ev.currentTarget.value)}
-            placeholder='example@xyz.com'
+            placeholder='First Name'
             mb={3}
           />
 
@@ -189,7 +189,7 @@ function App() {
             type='text'
             value={lastName}
             onChange={(ev) => setLastName(ev.currentTarget.value)}
-            placeholder='example@xyz.com'
+            placeholder='Last Name'
             mb={3}
           />
 
@@ -198,7 +198,7 @@ function App() {
             type='text'
             value={ownerDescription}
             onChange={(ev) => setOwnerDescription(ev.currentTarget.value)}
-            placeholder='example@xyz.com'
+            placeholder='Owner Description'
             mb={3}
           />
 
@@ -207,7 +207,7 @@ function App() {
             type='text'
             value={ownerComment}
             onChange={(ev) => setOwnerComment(ev.currentTarget.value)}
-            placeholder='example@xyz.com'
+            placeholder='Owner Comment'
             mb={3}
           />
 
@@ -216,7 +216,7 @@ function App() {
             type='text'
             value={ownerCode}
             onChange={(ev) => setOwnerCode(ev.currentTarget.value)}
-            placeholder='example@xyz.com'
+            placeholder='Owner Code'
             mb={3}
           />
 
@@ -238,8 +238,8 @@ function App() {
             onChange={(ev) => setAllowIncidentTracking(ev.currentTarget.value)}
             mb={3}
           >
-            <option value='true'>True</option>
-            <option value='false'>False</option>
+            <option value='True'>True</option>
+            <option value='False'>False</option>
           </Select>
 
           <FormLabel>Batch Code Length</FormLabel>
