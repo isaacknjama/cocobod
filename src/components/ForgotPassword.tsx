@@ -250,7 +250,7 @@ export const ResetPassword: React.FC = () => {
         );
         const data = await response.json();
         localStorage.clear();
-        navigate('/login');
+        navigate('/');
         if (!response.ok) {
           throw new Error(data.message);
         }

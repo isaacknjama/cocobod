@@ -40,6 +40,7 @@ interface LinkItemProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: 'Dashboard', icon: FaHome, url: '#' },
   { name: 'Owners', icon: FaUser, url: 'create-owner' },
+  { name: 'Regional Admins', icon: FaUser, url: 'create-regional-admin' },
   { name: 'Settings', icon: FaCog, url: 'settings' },
 ];
 
