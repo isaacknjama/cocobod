@@ -39,8 +39,9 @@ interface LinkItemProps {
 }
 const LinkItems: Array<LinkItemProps> = [
   { name: 'Dashboard', icon: FaHome, url: '#' },
-  { name: 'Owners', icon: FaUser, url: 'create-owner' },
-  { name: 'Regional Admins', icon: FaUser, url: 'create-regional-admin' },
+  { name: 'Owners', icon: FaUser, url: 'create-owner-admin' },
+  { name: 'Regional Admin', icon: FaUser, url: 'create-regional-admin' },
+  { name: 'District Admin', icon: FaUser, url: 'create-district-admin' },
   { name: 'Settings', icon: FaCog, url: 'settings' },
 ];
 
@@ -253,7 +254,9 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                 >
                   <Text fontSize='sm'>Isaack Njama</Text>
                   <Text fontSize='xs' color='gray.600'>
-                    Owner Admin
+                    {localStorage.getItem('role') === 'owner_admin'
+                      ? 'Owner Admin'
+                      : ''}
                   </Text>
                 </VStack>
                 <Box display={{ base: 'none', md: 'flex' }}>

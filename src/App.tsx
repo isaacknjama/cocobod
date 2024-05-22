@@ -1107,13 +1107,21 @@ function App() {
           }
         />
         <Route
-          path='/dashboard/create-owner'
+          path='/dashboard/create-owner-admin'
           element={
             <SidebarWithHeader children={[<CreateNewOwner key='owner' />]} />
           }
         />
         <Route
           path='/dashboard/create-regional-admin'
+          element={
+            <SidebarWithHeader
+              children={[<CreateRegionalAdmin key='owner' />]}
+            />
+          }
+        />
+        <Route
+          path='/dashboard/create-district-admin'
           element={
             <SidebarWithHeader
               children={[<CreateRegionalAdmin key='owner' />]}
