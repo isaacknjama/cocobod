@@ -836,7 +836,7 @@ function App() {
                           <Td>{data.region_comment}</Td>
                           <Td>{data.owner_name}</Td>
                           <Td>
-                            {data.user.status === 2 && (
+                            {data.user?.status === 2 && (
                               <Button
                                 type='submit'
                                 bg='yellow.500'
@@ -851,7 +851,7 @@ function App() {
                                 Reactivate
                               </Button>
                             )}
-                            {data.user.status === 1 && (
+                            {data.user?.status === 1 && (
                               <Button
                                 color='yellow.500'
                                 _hover={{
