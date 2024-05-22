@@ -72,6 +72,7 @@ export const Login: React.FC = () => {
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('Email', email);
         localStorage.setItem('role', data.role);
+        localStorage.setItem('id', data.id);
 
         if (data.access_token !== undefined) {
           toast({ title: 'Login successful', status: 'success' });
