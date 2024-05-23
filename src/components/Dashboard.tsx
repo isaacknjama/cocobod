@@ -79,12 +79,6 @@ export default function SidebarWithHeader({
   );
 }
 
-// const SampleAvatar = () => {
-//   return (
-//     <Avatar  name="Dan Abrahmov" src="https://bit.ly/dan-abramov"/>
-//   )
-// }
-
 interface SidebarProps extends BoxProps {
   onClose: () => void;
 }
@@ -201,6 +195,9 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
   const navigate = useNavigate();
   const toast = useToast();
 
+  const username = localStorage.getItem('username');
+  const role = localStorage.getItem('edited_role');
+
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
@@ -252,11 +249,9 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                   spacing='1px'
                   ml='2'
                 >
-                  <Text fontSize='sm'>Isaack Njama</Text>
+                  <Text fontSize='sm'>{username}</Text>
                   <Text fontSize='xs' color='gray.600'>
-                    {localStorage.getItem('role') === 'owner_admin'
-                      ? 'Owner Admin'
-                      : ''}
+                    {role}
                   </Text>
                 </VStack>
                 <Box display={{ base: 'none', md: 'flex' }}>
