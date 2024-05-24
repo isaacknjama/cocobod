@@ -41,6 +41,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Dashboard', icon: FaHome, url: '#' },
   { name: 'Owners', icon: FaUser, url: 'create-owner' },
   { name: 'Regional Admins', icon: FaUser, url: 'create-regional-admin' },
+  { name: 'Destination User', icon: FaUser, url: 'create-destination-user' },
   { name: 'Settings', icon: FaCog, url: 'settings' },
 ];
 
