@@ -92,6 +92,8 @@ export const Login: React.FC = () => {
         localStorage.setItem('Email', email);
         localStorage.setItem('role', data.role);
         localStorage.setItem('id', data.id);
+        localStorage.setItem('edited_role', data.edited_role);
+        localStorage.setItem('username', data.username);
 
         if (data.access_token !== undefined) {
           toast({ title: 'Login successful', status: 'success' });
