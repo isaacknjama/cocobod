@@ -295,6 +295,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                     toast({
                       title: 'Logged out successfully',
                       status: 'success',
+                      isClosable: true,
                     });
                   } else {
                     navigate('/');
