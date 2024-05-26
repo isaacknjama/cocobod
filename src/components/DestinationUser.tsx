@@ -305,7 +305,7 @@ export const DestinationUser = () => {
             isClosable: true,
           });
           closeModal();
-          navigate('/dashboard/create-regional-admin');
+          navigate('/dashboard/create-destination-user');
           setIsLoading(false);
         }
       } catch (err: unknown) {
