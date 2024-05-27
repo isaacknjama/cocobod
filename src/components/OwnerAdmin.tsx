@@ -32,6 +32,7 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiBaseUrl } from '../core/environment';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 export const CreateNewOwner = () => {
   const [ownerLogo, setOwnerLogo] = useState<File | null>(null);
@@ -337,7 +338,7 @@ export const ListAllOwners = () => {
   };
 
   return (
-    <div style={{ height: '87.5vh' }}>
+    <Box height='87.5vh' p={4}>
       {/* {console.log('Owner data:', ownerData?.message)} */}
       {ownerData ? (
         <>
@@ -345,11 +346,15 @@ export const ListAllOwners = () => {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'center',
               alignItems: 'center',
             }}
           >
-            <Table variant='striped' colorScheme='gray' maxWidth='160vh'>
+            <Table
+              variant='striped'
+              colorScheme='gray'
+              w={['100%', '100%', '80%', '80%']}
+              overflowX='visible'
+            >
               <Thead>
                 <Tr>
                   <Th>Owner ID</Th>
@@ -374,14 +379,16 @@ export const ListAllOwners = () => {
                           }}
                           textDecoration='underline'
                         >
-                          {expandedRow === data.owner_id
-                            ? 'Hide details'
-                            : 'See more details'}
+                          {expandedRow === data.owner_id ? (
+                            <FiChevronUp />
+                          ) : (
+                            <FiChevronDown />
+                          )}
                         </Link>
                       </Td>
                     </Tr>
                     {expandedRow === data.owner_id && (
-                      <Card maxWidth='80vh' mt={2} maxH='84vh'>
+                      <Card w={['100%', '90%', '80%', '60%']} mt={2}>
                         <CardHeader>
                           <Heading size='md'>Owner Details</Heading>
                         </CardHeader>
@@ -394,6 +401,7 @@ export const ListAllOwners = () => {
                                   src={data.owner_logo}
                                   objectFit='cover'
                                   alt='Owner Logo'
+                                  boxSize={['100px', '150px']}
                                 />
 
                                 <Heading size='s'>
@@ -418,9 +426,9 @@ export const ListAllOwners = () => {
                             </Flex>
                             <Stack
                               divider={<StackDivider />}
-                              display='flex'
                               flexDirection='row'
                               gap={8}
+                              wrap='wrap'
                             >
                               <Box>
                                 <Heading size='s'>Include Region</Heading>
@@ -454,10 +462,10 @@ export const ListAllOwners = () => {
           </TableContainer>
         </>
       ) : (
-        <Flex justifyContent='center' alignItems='center'>
+        <Flex justifyContent='center' alignItems='center' height='100%'>
           <Spinner size='xl' color='green.500' />
         </Flex>
       )}
-    </div>
+    </Box>
   );
 };
