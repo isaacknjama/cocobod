@@ -94,16 +94,6 @@ export const Login: React.FC = () => {
         localStorage.setItem('id', data.id);
         localStorage.setItem('edited_role', data.edited_role);
         localStorage.setItem('username', data.username);
-
-        if (data.access_token !== undefined) {
-          toast({ title: 'Login successful', status: 'success' });
-          navigate('/dashboard');
-        } else {
-          toast({
-            title: 'Invalid credentials, please try again!',
-            status: 'error',
-          });
-        }
       } catch (err: unknown) {
         console.error({ err });
         setError('Invalid username of password');
