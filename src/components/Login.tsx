@@ -94,16 +94,6 @@ export const Login: React.FC = () => {
         localStorage.setItem('id', data.id);
         localStorage.setItem('edited_role', data.edited_role);
         localStorage.setItem('username', data.username);
-
-        if (data.access_token !== undefined) {
-          toast({ title: 'Login successful', status: 'success' });
-          navigate('/dashboard');
-        } else {
-          toast({
-            title: 'Invalid credentials, please try again!',
-            status: 'error',
-          });
-        }
       } catch (err: unknown) {
         console.error({ err });
         setError('Invalid username of password');
@@ -115,26 +105,39 @@ export const Login: React.FC = () => {
   );
 
   return (
-    <Flex height='100vh' justifyContent='center' alignItems='center'>
+    <Flex height='100vh' justifyContent='center' alignItems='center' p={4}>
       <form onSubmit={handleSubmit}>
-        <Flex direction='column' align='start'>
-          <Flex m='auto'>
+        <Flex
+          direction='column'
+          align='start'
+          w={['100%', '600px']}
+          p={4}
+          boxShadow='md'
+          borderRadius='md'
+          bg='white'
+        >
+          <Flex m='auto' mb={4} justifyContent='center'>
             <Image
               src='/logo.png'
               alt='eBiashara Logo'
-              boxSize='sm'
-              height='100%'
-              width='100%'
+              boxSize={['100px', '150px']}
+              objectFit='contain'
             />
           </Flex>
           <Flex direction='column' align='start'>
-            <Heading size='md' fontWeight='bold'>
+            <Heading
+              size='md'
+              fontWeight='bold'
+              mb={4}
+              textAlign='center'
+              w={'100%'}
+            >
               Sign In
             </Heading>
           </Flex>
-          <FormControl>
+          <FormControl mb={4}>
             <FormLabel>Email Address</FormLabel>
-            <InputGroup style={{ marginBottom: '1rem' }}>
+            <InputGroup mb={4}>
               <Input
                 placeholder='Email address'
                 type='email'
@@ -150,7 +153,7 @@ export const Login: React.FC = () => {
             </InputGroup>
 
             <FormLabel>Password</FormLabel>
-            <InputGroup>
+            <InputGroup mb={4}>
               <Input
                 placeholder='Password'
                 type={showPassword ? 'text' : 'password'}
@@ -163,7 +166,12 @@ export const Login: React.FC = () => {
                 {!showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
               </InputRightElement>
             </InputGroup>
-            <Stack direction='row' spacing={40}>
+            <Stack
+              direction={['column', 'row']}
+              justifyContent='space-between'
+              alignItems='center'
+              mb={4}
+            >
               <Checkbox
                 defaultChecked
                 colorScheme='green'
@@ -174,14 +182,10 @@ export const Login: React.FC = () => {
               </Checkbox>
               <Link
                 href='/forgot-password'
-                style={{
-                  fontSize: '15px',
-                  padding: '25px',
-                  marginLeft: '282px',
-                }}
-                color='green'
+                fontSize='sm'
+                color='green.500'
                 _hover={{
-                  color: 'green',
+                  color: 'green.700',
                 }}
                 aria-label='forgot- password'
                 // onClick={(e) => {
