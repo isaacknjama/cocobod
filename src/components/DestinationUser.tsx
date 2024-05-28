@@ -21,10 +21,16 @@ import {
   Thead,
   Tr,
   useToast,
+  ChakraProvider,
+  Box,
+  FormControl,
 } from '@chakra-ui/react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiBaseUrl } from '../core/environment';
+import { format } from 'date-fns';
 
 export const DestinationUser = () => {
   interface Owner {
@@ -118,8 +124,22 @@ export const DestinationUser = () => {
   const [ownerAdminId, setOwnerAdminId] = useState('');
   const [districtAdmin, setdistrictAdmin] = useState('');
   const [regionalAdmin, setregionalAdmin] = useState('');
+
+  const [productName, setproductName] = useState('');
+  const [brand, setbrand] = useState('');
+  const [category, setcategory] = useState('');
+  const [batchNumber, setbatchNumber] = useState('');
+  const [manufactureDate, setmanufactureDate] = useState<Date | null>(null);
+  const [expiryDate, setexpiryDate] = useState<Date | null>(null);
+  const [barcodeSerialNumber, setbarcodeSerialNumber] = useState('');
+  const [incidentDescription, setincidentDescription] = useState('');
+  const [severity, setseverity] = useState('');
+  const [status, setstatus] = useState('');
+
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isIncidenceOpen, setIsIncidenceOpen] = useState(false);
+
   const [isSuspendOpen, setSuspendIsOpen] = useState(false);
   const [isReactivateOpen, setReactivateIsOpen] = useState(false);
   const [currentId, setCurrentId] = useState<number>();
@@ -249,10 +269,15 @@ export const DestinationUser = () => {
     fetchDistrictAdmins();
   };
 
+  const openIncidentModal = () => {
+    setIsIncidenceOpen(true);
+  };
+
   const closeModal = useCallback(() => {
     setIsOpen(false);
     setSuspendIsOpen(false);
     setReactivateIsOpen(false);
+    setIsIncidenceOpen(false);
     fetchDestinationUsers();
   }, []);
 
@@ -327,6 +352,84 @@ export const DestinationUser = () => {
       ownerAdminId,
       regionalAdmin,
       districtAdmin,
+      toast,
+      closeModal,
+      navigate,
+    ],
+  );
+
+  const handleIncidenceSubmit = useCallback(
+    async (ev: React.FormEvent) => {
+      ev.preventDefault();
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const formData = new FormData();
+
+        formData.append('product_name', productName);
+        formData.append('brand', brand);
+        formData.append('category', category);
+        formData.append('batch_number', batchNumber);
+        formData.append(
+          'manufacture_date',
+          format(manufactureDate!, 'yyyy-MM-dd'),
+        );
+        formData.append('expiry_date', format(expiryDate!, 'yyyy-MM-dd'));
+        formData.append('barcode_serial_number', barcodeSerialNumber);
+        formData.append('incident_description', incidentDescription);
+        formData.append('severity', severity);
+        formData.append('status', status);
+
+        const response = await fetch(
+          `${apiBaseUrl}/api/v1/incident-reports/create-incident-report/`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          },
+        );
+        const data = await response.json();
+        console.log(data);
+        if (!response.ok) {
+          toast({
+            title: `${data.message}`,
+            status: 'error',
+            isClosable: true,
+          });
+          setIsLoading(false);
+          throw new Error(data.detail);
+        } else {
+          toast({
+            title: `${data.message}`,
+            status: 'success',
+            isClosable: true,
+          });
+          closeModal();
+          navigate('/dashboard/create-destination-user');
+          setIsLoading(false);
+        }
+      } catch (err: unknown) {
+        console.error({ err });
+        toast({ title: `${err}`, status: 'error', isClosable: true });
+        setIsLoading(false);
+      } finally {
+        setIsLoading(false);
+        closeModal();
+      }
+    },
+    [
+      productName,
+      brand,
+      category,
+      batchNumber,
+      manufactureDate,
+      expiryDate,
+      barcodeSerialNumber,
+      incidentDescription,
+      severity,
+      status,
       toast,
       closeModal,
       navigate,
@@ -422,6 +525,20 @@ export const DestinationUser = () => {
           Destination Users
         </h1>
         <div style={{ flexGrow: 1 }}></div>
+        <Button
+          type='submit'
+          bg='yellow.500'
+          color={'white'}
+          _hover={{
+            background: 'yellow.300',
+          }}
+          style={{
+            marginRight: 5,
+          }}
+          onClick={openIncidentModal}
+        >
+          Report Incindent
+        </Button>
         <Button
           type='submit'
           bg='yellow.500'
@@ -729,6 +846,169 @@ export const DestinationUser = () => {
               }}
               style={{
                 marginLeft: 4,
+              }}
+              variant='ghost'
+              onClick={closeModal}
+            >
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Modal isOpen={isIncidenceOpen} onClose={closeModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Add Incindence Report</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <form
+              onSubmit={handleIncidenceSubmit}
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                alignItems: 'center',
+                textAlign: 'center',
+                margin: 'auto',
+              }}
+              encType='multipart/form-data'
+            >
+              <FormLabel>Product Name</FormLabel>
+              <Input
+                type='text'
+                value={productName}
+                required={true}
+                onChange={(ev) => setproductName(ev.currentTarget.value)}
+                mb={3}
+              />
+
+              <FormLabel>Brand</FormLabel>
+              <Input
+                type='text'
+                value={brand}
+                required={true}
+                onChange={(ev) => setbrand(ev.currentTarget.value)}
+                mb={3}
+              />
+
+              <FormLabel>Category</FormLabel>
+              <Input
+                type='text'
+                value={category}
+                required={true}
+                onChange={(ev) => setcategory(ev.currentTarget.value)}
+                mb={3}
+              />
+
+              <FormLabel>Batch Number</FormLabel>
+              <Input
+                type='text'
+                value={batchNumber}
+                required={true}
+                onChange={(ev) => setbatchNumber(ev.currentTarget.value)}
+                mb={3}
+              />
+
+              <ChakraProvider>
+                <Box maxW='md' mt={5}>
+                  <FormControl>
+                    <FormLabel htmlFor='date'>Manufacture Date</FormLabel>
+                    <DatePicker
+                      id='date'
+                      selected={manufactureDate}
+                      onChange={(date: Date | null) => setmanufactureDate(date)}
+                      customInput={<Input />}
+                      dateFormat='yyyy-MM-dd'
+                    />
+                  </FormControl>
+                </Box>
+              </ChakraProvider>
+
+              <ChakraProvider>
+                <Box maxW='md' mt={5} mb={5} style={{ width: '100%' }}>
+                  <FormControl style={{ width: '100%' }}>
+                    <FormLabel htmlFor='date'>Expiry Date</FormLabel>
+                    <DatePicker
+                      id='date'
+                      selected={expiryDate}
+                      onChange={(date: Date | null) => setexpiryDate(date)}
+                      customInput={<Input style={{ width: '100%' }} />}
+                      dateFormat='yyyy-MM-dd'
+                    />
+                  </FormControl>
+                </Box>
+              </ChakraProvider>
+
+              <FormLabel>Barcode Serial Number</FormLabel>
+              <Input
+                type='number'
+                value={barcodeSerialNumber}
+                required={true}
+                onChange={(ev) =>
+                  setbarcodeSerialNumber(ev.currentTarget.value)
+                }
+                mb={3}
+              />
+
+              <FormLabel>Status</FormLabel>
+              <Select
+                placeholder='Select option'
+                value={status || ''}
+                required={true}
+                onChange={(ev) => setstatus(ev.currentTarget.value)}
+                mb={3}
+              >
+                <option value='Reported'>Reported</option>
+                <option value='Not Reported'>Not Reported</option>
+              </Select>
+
+              <FormLabel>Severity</FormLabel>
+              <Select
+                placeholder='Select option'
+                value={severity || ''}
+                required={true}
+                onChange={(ev) => setseverity(ev.currentTarget.value)}
+                mb={3}
+              >
+                <option value='Low'>Low</option>
+                <option value='Medium'>Medium</option>
+                <option value='High'>High</option>
+              </Select>
+
+              <FormLabel>Incident Description</FormLabel>
+              <Textarea
+                required={true}
+                value={incidentDescription}
+                onChange={(ev) =>
+                  setincidentDescription(ev.currentTarget.value)
+                }
+                mb={3}
+              />
+
+              <Button
+                type='submit'
+                w='100%'
+                bg='yellow.500'
+                color={'white'}
+                _hover={{
+                  background: 'yellow.300',
+                }}
+                style={{
+                  marginTop: 10,
+                }}
+                isLoading={isLoading}
+                loadingText='Loading'
+              >
+                Submit
+              </Button>
+            </form>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              color='yellow.500'
+              _hover={{
+                background: 'yellow.500',
+                color: 'white',
               }}
               variant='ghost'
               onClick={closeModal}
