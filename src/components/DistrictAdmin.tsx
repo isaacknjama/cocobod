@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Flex,
   FormLabel,
@@ -246,7 +247,6 @@ export const CreateDistrictAdmin = () => {
         }
       } catch (err: unknown) {
         console.error({ err });
-        // toast({ title: `${err}`, status: 'error', isClosable: true });
         setIsLoading(false);
       } finally {
         setIsLoading(false);
@@ -370,7 +370,7 @@ export const CreateDistrictAdmin = () => {
         </Button>
       </div>
 
-      <div style={{ height: '87.5vh' }}>
+      <Box style={{ height: '87.5vh' }}>
         {districtAdminData ? (
           <>
             <TableContainer
@@ -381,7 +381,13 @@ export const CreateDistrictAdmin = () => {
                 alignItems: 'center',
               }}
             >
-              <Table variant='striped' colorScheme='gray' maxWidth='160vh'>
+              <Table
+                size='sm'
+                variant='striped'
+                colorScheme='gray'
+                w={['100%', '100%', '80%', '80%']}
+                overflowX='visible'
+              >
                 <Thead>
                   <Tr>
                     <Th>District ID</Th>
@@ -441,7 +447,7 @@ export const CreateDistrictAdmin = () => {
             <Spinner size='xl' color='green.500' />
           </Flex>
         )}
-      </div>
+      </Box>
 
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
