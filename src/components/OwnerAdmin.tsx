@@ -10,6 +10,13 @@ import {
   Image,
   Input,
   Link,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
@@ -47,6 +54,7 @@ export const CreateNewOwner = () => {
     useState<string>('');
   const [batchCodeLength, setBatchCodeLength] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const toast = useToast();
   const navigate = useNavigate();
@@ -118,143 +126,216 @@ export const CreateNewOwner = () => {
     ],
   );
 
+  const openModal = () => {
+    setIsOpen(true);
+  };
+
+  const closeModal = useCallback(() => {
+    setIsOpen(false);
+    ListAllOwners();
+  }, []);
+
   return (
-    <>
-      <form
-        onSubmit={handleSubmit}
+    <React.Fragment>
+      <div
         style={{
-          width: '70vh',
-          height: '95vh',
+          width: '100%',
+          display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          textAlign: 'center',
-          margin: 'auto',
+          marginBottom: 10,
         }}
-        encType='multipart/form-data'
       >
-        <>
-          <FormLabel>Owner Logo</FormLabel>
-          <Input
-            type='file'
-            accept='image/png, image/jpeg'
-            onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
-              if (ev.target.files !== null) {
-                setOwnerLogo(ev.target.files[0]);
-              }
-            }}
-            style={{
-              marginBottom: '4px',
-            }}
-          />
-        </>
-
-        <FormLabel>Email Address</FormLabel>
-        <Input
-          type='email'
-          value={email}
-          onChange={(ev) => setEmail(ev.currentTarget.value)}
-          placeholder='example@xyz.com'
-          mb={3}
-        />
-
-        <FormLabel>First Name</FormLabel>
-        <Input
-          type='text'
-          value={firstName}
-          onChange={(ev) => setFirstName(ev.currentTarget.value)}
-          placeholder='First Name'
-          mb={3}
-        />
-
-        <FormLabel>Last Name</FormLabel>
-        <Input
-          type='text'
-          value={lastName}
-          onChange={(ev) => setLastName(ev.currentTarget.value)}
-          placeholder='Last Name'
-          mb={3}
-        />
-
-        <FormLabel>Owner Description</FormLabel>
-        <Input
-          type='text'
-          value={ownerDescription}
-          onChange={(ev) => setOwnerDescription(ev.currentTarget.value)}
-          placeholder='Owner Description'
-          mb={3}
-        />
-
-        <FormLabel>Owner Comment</FormLabel>
-        <Input
-          type='text'
-          value={ownerComment}
-          onChange={(ev) => setOwnerComment(ev.currentTarget.value)}
-          placeholder='Owner Comment'
-          mb={3}
-        />
-
-        <FormLabel>Owner Code</FormLabel>
-        <Input
-          type='text'
-          value={ownerCode}
-          onChange={(ev) => setOwnerCode(ev.currentTarget.value)}
-          placeholder='Owner Code'
-          mb={3}
-        />
-
-        <FormLabel>Serialize Codes</FormLabel>
-        <Select
-          placeholder='Select option'
-          value={serializeCodes || ''}
-          onChange={(ev) => setSerializeCodes(ev.currentTarget.value)}
-          mb={3}
-        >
-          <option value='true'>True</option>
-          <option value='false'>False</option>
-        </Select>
-
-        <FormLabel>Allow Incident Tracking</FormLabel>
-        <Select
-          placeholder='Select option'
-          value={allowIncidentTracking}
-          onChange={(ev) => setAllowIncidentTracking(ev.currentTarget.value)}
-          mb={3}
-        >
-          <option value='True'>True</option>
-          <option value='False'>False</option>
-        </Select>
-
-        <FormLabel>Batch Code Length</FormLabel>
-        <NumberInput
-          value={batchCodeLength}
-          onChange={(value) => setBatchCodeLength(parseInt(value))}
-          mb={3}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-
-        <Button
-          type='submit'
-          w='70vh'
-          bg='green.500'
-          _hover={{
-            background: 'yellow.500',
+        <div
+          style={{
+            maxWidth: '160vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        ></div>
+        <h1
+          style={{
+            fontSize: 20,
+            fontWeight: 600,
           }}
         >
-          {isLoading ? (
-            <>
-              <Spinner color='yellow.500' />
-            </>
-          ) : (
-            'Submit'
-          )}
+          Owner Admin
+        </h1>
+        <div style={{ flexGrow: 1 }}></div>
+        <Button
+          type='submit'
+          bg='yellow.500'
+          color={'white'}
+          _hover={{
+            background: 'yellow.300',
+          }}
+          onClick={openModal}
+        >
+          Add Owner Admin
         </Button>
-      </form>
-    </>
+      </div>
+
+      <Modal isOpen={isOpen} onClose={closeModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Add Owner Admin</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <form
+              onSubmit={handleSubmit}
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                alignItems: 'center',
+                textAlign: 'center',
+                margin: 'auto',
+              }}
+              encType='multipart/form-data'
+            >
+              <>
+                <FormLabel>Owner Logo</FormLabel>
+                <Input
+                  type='file'
+                  accept='image/png, image/jpeg'
+                  onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
+                    if (ev.target.files !== null) {
+                      setOwnerLogo(ev.target.files[0]);
+                    }
+                  }}
+                  style={{
+                    marginBottom: '4px',
+                  }}
+                />
+              </>
+
+              <FormLabel>Email Address</FormLabel>
+              <Input
+                type='email'
+                value={email}
+                onChange={(ev) => setEmail(ev.currentTarget.value)}
+                placeholder='example@xyz.com'
+                mb={3}
+              />
+
+              <FormLabel>First Name</FormLabel>
+              <Input
+                type='text'
+                value={firstName}
+                onChange={(ev) => setFirstName(ev.currentTarget.value)}
+                placeholder='First Name'
+                mb={3}
+              />
+
+              <FormLabel>Last Name</FormLabel>
+              <Input
+                type='text'
+                value={lastName}
+                onChange={(ev) => setLastName(ev.currentTarget.value)}
+                placeholder='Last Name'
+                mb={3}
+              />
+
+              <FormLabel>Owner Description</FormLabel>
+              <Input
+                type='text'
+                value={ownerDescription}
+                onChange={(ev) => setOwnerDescription(ev.currentTarget.value)}
+                placeholder='Owner Description'
+                mb={3}
+              />
+
+              <FormLabel>Owner Comment</FormLabel>
+              <Input
+                type='text'
+                value={ownerComment}
+                onChange={(ev) => setOwnerComment(ev.currentTarget.value)}
+                placeholder='Owner Comment'
+                mb={3}
+              />
+
+              <FormLabel>Owner Code</FormLabel>
+              <Input
+                type='text'
+                value={ownerCode}
+                onChange={(ev) => setOwnerCode(ev.currentTarget.value)}
+                placeholder='Owner Code'
+                mb={3}
+              />
+
+              <FormLabel>Serialize Codes</FormLabel>
+              <Select
+                placeholder='Select option'
+                value={serializeCodes || ''}
+                onChange={(ev) => setSerializeCodes(ev.currentTarget.value)}
+                mb={3}
+              >
+                <option value='true'>True</option>
+                <option value='false'>False</option>
+              </Select>
+
+              <FormLabel>Allow Incident Tracking</FormLabel>
+              <Select
+                placeholder='Select option'
+                value={allowIncidentTracking}
+                onChange={(ev) =>
+                  setAllowIncidentTracking(ev.currentTarget.value)
+                }
+                mb={3}
+              >
+                <option value='True'>True</option>
+                <option value='False'>False</option>
+              </Select>
+
+              <FormLabel>Batch Code Length</FormLabel>
+              <NumberInput
+                value={batchCodeLength}
+                onChange={(value) => setBatchCodeLength(parseInt(value))}
+                mb={3}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+
+              <Button
+                type='submit'
+                w='100%'
+                bg='yellow.500'
+                _hover={{
+                  background: 'yellow.500',
+                }}
+              >
+                {isLoading ? (
+                  <>
+                    <Spinner color='green.500' />
+                  </>
+                ) : (
+                  'Submit'
+                )}
+              </Button>
+            </form>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              color='yellow.500'
+              _hover={{
+                background: 'yellow.500',
+                color: '#FFF',
+              }}
+              variant='ghost'
+              onClick={closeModal}
+            >
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </React.Fragment>
   );
 };
 
