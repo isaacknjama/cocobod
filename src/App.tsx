@@ -12,6 +12,7 @@ import {
   CreateDistrictAdmin,
   CreateNewOwner,
   CreateRegionalAdmin,
+  DestinationUser,
   ListAllOwners,
 } from './components/index';
 
@@ -50,6 +51,13 @@ function App() {
             <SidebarWithHeader
               children={[<CreateDistrictAdmin key='owner' />]}
             />
+          }
+        />
+
+        <Route
+          path='/dashboard/create-destination-user'
+          element={
+            <SidebarWithHeader children={[<DestinationUser key='owner' />]} />
           }
         />
         <Route
