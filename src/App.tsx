@@ -12,6 +12,7 @@ import {
   CreateDistrictAdmin,
   CreateNewOwner,
   CreateRegionalAdmin,
+  DashboardStatistics,
   DestinationUser,
 } from './components/index';
 
@@ -26,7 +27,7 @@ function App() {
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route
           path='/dashboard'
-          element={<SidebarWithHeader children={[]} />}
+          element={<SidebarWithHeader children={[<DashboardStatistics />]} />}
         />
         <Route
           path='/dashboard/owner-admin'
