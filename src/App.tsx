@@ -13,7 +13,6 @@ import {
   CreateNewOwner,
   CreateRegionalAdmin,
   DestinationUser,
-  ListAllOwners,
 } from './components/index';
 
 function App() {
@@ -27,18 +26,16 @@ function App() {
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route
           path='/dashboard'
-          element={
-            <SidebarWithHeader children={[<ListAllOwners key='owner' />]} />
-          }
+          element={<SidebarWithHeader children={[]} />}
         />
         <Route
-          path='/dashboard/create-owner-admin'
+          path='/dashboard/owner-admin'
           element={
             <SidebarWithHeader children={[<CreateNewOwner key='owner' />]} />
           }
         />
         <Route
-          path='/dashboard/create-regional-admin'
+          path='/dashboard/regional-admin'
           element={
             <SidebarWithHeader
               children={[<CreateRegionalAdmin key='owner' />]}
@@ -46,7 +43,7 @@ function App() {
           }
         />
         <Route
-          path='/dashboard/create-district-admin'
+          path='/dashboard/district-admin'
           element={
             <SidebarWithHeader
               children={[<CreateDistrictAdmin key='owner' />]}
@@ -55,7 +52,7 @@ function App() {
         />
 
         <Route
-          path='/dashboard/create-destination-user'
+          path='/dashboard/destination-user'
           element={
             <SidebarWithHeader children={[<DestinationUser key='owner' />]} />
           }
