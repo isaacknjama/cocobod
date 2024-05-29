@@ -40,9 +40,9 @@ interface LinkItemProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: 'Dashboard', icon: FaHome, url: '#' },
   { name: 'Owners', icon: FaUser, url: 'create-owner-admin' },
-  { name: 'Regional Admins', icon: FaUser, url: 'create-regional-admin' },
-  { name: 'District Admin', icon: FaUser, url: 'create-district-admin' },
-  { name: 'Destination User', icon: FaUser, url: 'create-destination-user' },
+  { name: 'Regions', icon: FaUser, url: 'create-regional-admin' },
+  { name: 'Districts', icon: FaUser, url: 'create-district-admin' },
+  { name: 'Destinations', icon: FaUser, url: 'create-destination-user' },
   { name: 'Settings', icon: FaCog, url: 'settings' },
 ];
 
