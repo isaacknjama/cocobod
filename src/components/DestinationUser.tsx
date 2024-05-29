@@ -563,7 +563,12 @@ export const DestinationUser = () => {
                 alignItems: 'center',
               }}
             >
-              <Table variant='striped' colorScheme='gray' maxWidth='160vh'>
+              <Table
+                variant='striped'
+                colorScheme='gray'
+                w={['100%', '100%', '80%', '80%']}
+                overflowX='visible'
+              >
                 <Thead>
                   <Tr>
                     <Th>Destination ID</Th>

@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Flex,
   FormLabel,
@@ -342,7 +343,7 @@ export const CreateRegionalAdmin = () => {
         </Button>
       </div>
 
-      <div style={{ height: '87.5vh' }}>
+      <Box style={{ height: '87.5vh' }} p={4}>
         {regionalAdminData ? (
           <>
             <TableContainer
@@ -353,7 +354,12 @@ export const CreateRegionalAdmin = () => {
                 alignItems: 'center',
               }}
             >
-              <Table variant='striped' colorScheme='gray' maxWidth='160vh'>
+              <Table
+                variant='striped'
+                colorScheme='gray'
+                w={['100%', '100%', '80%', '80%']}
+                overflowX='visible'
+              >
                 <Thead>
                   <Tr>
                     <Th>Region ID</Th>
@@ -413,7 +419,7 @@ export const CreateRegionalAdmin = () => {
             <Spinner size='xl' color='green.500' />
           </Flex>
         )}
-      </div>
+      </Box>
 
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
