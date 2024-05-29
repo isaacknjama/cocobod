@@ -537,7 +537,7 @@ export const DestinationUser = () => {
           }}
           onClick={openIncidentModal}
         >
-          Report Incindent
+          Report Incident
         </Button>
         <Button
           type='submit'
@@ -858,7 +858,7 @@ export const DestinationUser = () => {
       <Modal isOpen={isIncidenceOpen} onClose={closeModal}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Add Incindence Report</ModalHeader>
+          <ModalHeader>Add Incidence Report</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <form
