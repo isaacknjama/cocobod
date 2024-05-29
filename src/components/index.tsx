@@ -1,4 +1,4 @@
 export { CreateDistrictAdmin } from './DistrictAdmin';
-export { CreateNewOwner, ListAllOwners } from './OwnerAdmin';
+export { CreateNewOwner } from './OwnerAdmin';
 export { CreateRegionalAdmin } from './RegionalAdmin';
 export { DestinationUser } from './DestinationUser';
