@@ -29,7 +29,14 @@ import { FiMenu, FiBell, FiChevronDown } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
 import { AiOutlineUser } from 'react-icons/ai';
-import { FaCog, FaHome, FaUser } from 'react-icons/fa';
+import {
+  FaCog,
+  FaFlag,
+  FaHome,
+  FaUser,
+  FaLocationArrow,
+  FaBuilding,
+} from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 interface LinkItemProps {
@@ -39,10 +46,11 @@ interface LinkItemProps {
 }
 const LinkItems: Array<LinkItemProps> = [
   { name: 'Dashboard', icon: FaHome, url: '#' },
+  { name: 'Owners', icon: FaUser, url: 'create-owner' },
   { name: 'Owners', icon: FaUser, url: 'owner-admin' },
-  { name: 'Regions', icon: FaUser, url: 'regional-admin' },
-  { name: 'Districts', icon: FaUser, url: 'district-admin' },
-  { name: 'Destinations', icon: FaUser, url: 'destination-user' },
+  { name: 'Regions', icon: FaLocationArrow, url: 'regional-admin' },
+  { name: 'Districts', icon: FaBuilding, url: 'district-admin' },
+  { name: 'Destinations', icon: FaFlag, url: 'destination-user' },
   { name: 'Settings', icon: FaCog, url: 'settings' },
 ];
 
