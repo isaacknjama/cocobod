@@ -29,7 +29,6 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
 import { apiBaseUrl } from '../core/environment';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
@@ -123,7 +122,6 @@ export const CreateRegionalAdmin = () => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
   const toast = useToast();
-  // const navigate = useNavigate();
 
   const fetchRegions = async () => {
     try {
@@ -153,13 +151,12 @@ export const CreateRegionalAdmin = () => {
     }
   };
 
-  const fetchRegionalAdmins = async (ownerId: number) => {
+  const fetchRegionalAdmins = async () => {
     try {
       const token = localStorage.getItem('token');
-      // const id = localStorage.getItem('id');
       setIsLoading(true);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/regions/list-all-region-owners/${ownerId}`,
+        `${apiBaseUrl}/api/v1/regions/list-all-region-owners/${localStorage.getItem('currentId')}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -181,46 +178,21 @@ export const CreateRegionalAdmin = () => {
     }
   };
 
-  // const fetchOwners = async () => {
-  //   try {
-  //     const token = localStorage.getItem('token');
-  //     setIsLoading(true);
-  //     const response = await fetch(
-  //       `${apiBaseUrl}/api/v1/owner/list-all-owners/`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       },
-  //     );
-  //     if (!response.ok) {
-  //       setIsLoading(false);
-  //       throw new Error('Network response was not ok!');
-  //     }
-  //     const owners = await response.json();
-  //     setOwnerData(owners);
-  //     setIsLoading(false);
-  //   } catch (err) {
-  //     console.error('Error fetching data: ', err);
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const openModal = () => {
     setIsOpen(true);
-    // fetchOwners();
   };
 
   const openRegionModal = () => {
     setIsRegionOpen(true);
   };
 
-  const closeModal = useCallback(() => {
+  const closeModal = useCallback(async () => {
     setIsOpen(false);
     setIsRegionOpen(false);
     setSuspendIsOpen(false);
     setReactivateIsOpen(false);
-    fetchRegions();
+    await fetchRegions();
+    await fetchRegionalAdmins();
   }, []);
 
   const handleToggleRow = async (ownerId: number) => {
@@ -230,13 +202,19 @@ export const CreateRegionalAdmin = () => {
     } else {
       setRegionalAdminData(null);
       setExpandedRow(ownerId);
-      await fetchRegionalAdmins(ownerId);
+      localStorage.setItem('currentId', ownerId);
     }
   };
 
   useEffect(() => {
     fetchRegions();
   }, []);
+
+  useEffect(() => {
+    if (expandedRow !== null) {
+      fetchRegionalAdmins();
+    }
+  }, [expandedRow]);
 
   const handleSubmit = useCallback(
     async (ev: React.FormEvent) => {
@@ -278,7 +256,6 @@ export const CreateRegionalAdmin = () => {
             isClosable: true,
           });
           closeModal();
-          // navigate('/dashboard/create-regional-admin');
           setIsLoading(false);
         }
       } catch (err: unknown) {
@@ -299,7 +276,6 @@ export const CreateRegionalAdmin = () => {
       regionComment,
       toast,
       closeModal,
-      // navigate,
     ],
   );
 
@@ -342,7 +318,6 @@ export const CreateRegionalAdmin = () => {
             isClosable: true,
           });
           closeModal();
-          // navigate('/dashboard/create-regional-admin');
           setIsLoading(false);
         }
       } catch (err: unknown) {
