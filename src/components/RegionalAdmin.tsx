@@ -1,4 +1,7 @@
 import {
+  Card,
+  CardBody,
+  CardHeader,
   Box,
   Button,
   Flex,
@@ -13,6 +16,7 @@ import {
   ModalOverlay,
   Select,
   Spinner,
+  Heading,
   Table,
   TableContainer,
   Tbody,
@@ -21,30 +25,32 @@ import {
   Th,
   Thead,
   Tr,
+  Link,
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiBaseUrl } from '../core/environment';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 export const CreateRegionalAdmin = () => {
-  interface Owner {
-    owner_id: number;
-    owner_name: string;
-    owner_code: string;
-    batch_code_length: number;
-    owner_logo: string;
-    allow_incident_tracking: string;
-    include_district: string;
-    include_region: string;
-    owner_comment: string;
-    owner_description: string;
-    serialise_codes: string;
-  }
+  // interface Owner {
+  //   owner_id: number;
+  //   owner_name: string;
+  //   owner_code: string;
+  //   batch_code_length: number;
+  //   owner_logo: string;
+  //   allow_incident_tracking: string;
+  //   include_district: string;
+  //   include_region: string;
+  //   owner_comment: string;
+  //   owner_description: string;
+  //   serialise_codes: string;
+  // }
 
-  interface OwnerData {
-    message: Owner[];
-  }
+  // interface OwnerData {
+  //   message: Owner[];
+  // }
 
   interface UserData {
     id: number;
@@ -69,47 +75,91 @@ export const CreateRegionalAdmin = () => {
   }
 
   interface RegionalAdmin {
-    region_id: number;
-    region_name: string;
-    region_code: string;
-    region_comment: string;
+    id: number;
+    regionalAdmin_name: string;
+    regionalAdmin_description: string;
+    regionalAdmin_mobileNumber: string;
+    regionalAdmin_email: string;
     user: UserData;
-    owner_name: string;
-    owner: number;
+    region: number;
   }
 
   interface RegionalAdminData {
     message: RegionalAdmin[];
   }
 
+  interface Region {
+    region_id: number;
+    region_name: string;
+    region_code: string;
+    region_comment: string;
+    state: number;
+  }
+
+  interface RegionData {
+    message: Region[];
+  }
+
   const [regionName, setRegionName] = useState('');
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [regionDescription, setRegionDescription] = useState('');
-  const [regionCode, setRegionCode] = useState('');
-  const [ownerAdminId, setOwnerAdminId] = useState('');
+  const [regionId, setRegionId] = useState('');
   const [regionComment, setRegionComment] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isRegionOpen, setIsRegionOpen] = useState(false);
   const [isSuspendOpen, setSuspendIsOpen] = useState(false);
   const [isReactivateOpen, setReactivateIsOpen] = useState(false);
+
   const [currentId, setCurrentId] = useState<number>();
 
-  const [ownerData, setOwnerData] = useState<OwnerData>();
+  // const [ownerData, setOwnerData] = useState<OwnerData>();
   const [regionalAdminData, setRegionalAdminData] =
-    useState<RegionalAdminData>();
+    useState<RegionalAdminData | null>();
+  const [regionData, setRegionData] = useState<RegionData | null>();
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
   const toast = useToast();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  const fetchRegionalAdmins = async () => {
+  const fetchRegions = async () => {
     try {
       const token = localStorage.getItem('token');
-      const id = localStorage.getItem('id');
+      const id = localStorage.getItem('stateId');
       setIsLoading(true);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/regions/list-all-region-owners/${id}`,
+        `${apiBaseUrl}/api/v1/regions/list-all-regions/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        setIsLoading(false);
+        throw new Error('Network response was not ok!');
+      }
+      const regions = await response.json();
+      setRegionData(regions);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error fetching data: ', err);
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchRegionalAdmins = async (ownerId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      // const id = localStorage.getItem('id');
+      setIsLoading(true);
+      const response = await fetch(
+        `${apiBaseUrl}/api/v1/regions/list-all-region-owners/${ownerId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -131,45 +181,61 @@ export const CreateRegionalAdmin = () => {
     }
   };
 
-  const fetchOwners = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      setIsLoading(true);
-      const response = await fetch(
-        `${apiBaseUrl}/api/v1/owner/list-all-owners/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        setIsLoading(false);
-        throw new Error('Network response was not ok!');
-      }
-      const owners = await response.json();
-      setOwnerData(owners);
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Error fetching data: ', err);
-      setIsLoading(false);
-    }
-  };
+  // const fetchOwners = async () => {
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     setIsLoading(true);
+  //     const response = await fetch(
+  //       `${apiBaseUrl}/api/v1/owner/list-all-owners/`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+  //     if (!response.ok) {
+  //       setIsLoading(false);
+  //       throw new Error('Network response was not ok!');
+  //     }
+  //     const owners = await response.json();
+  //     setOwnerData(owners);
+  //     setIsLoading(false);
+  //   } catch (err) {
+  //     console.error('Error fetching data: ', err);
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const openModal = () => {
     setIsOpen(true);
-    fetchOwners();
+    // fetchOwners();
+  };
+
+  const openRegionModal = () => {
+    setIsRegionOpen(true);
   };
 
   const closeModal = useCallback(() => {
     setIsOpen(false);
+    setIsRegionOpen(false);
     setSuspendIsOpen(false);
     setReactivateIsOpen(false);
-    fetchRegionalAdmins();
+    fetchRegions();
   }, []);
 
+  const handleToggleRow = async (ownerId: number) => {
+    if (expandedRow === ownerId) {
+      setExpandedRow(null);
+      setRegionalAdminData(null);
+    } else {
+      setRegionalAdminData(null);
+      setExpandedRow(ownerId);
+      await fetchRegionalAdmins(ownerId);
+    }
+  };
+
   useEffect(() => {
-    fetchRegionalAdmins();
+    fetchRegions();
   }, []);
 
   const handleSubmit = useCallback(
@@ -179,14 +245,12 @@ export const CreateRegionalAdmin = () => {
       try {
         const token = localStorage.getItem('token');
         const formData = new FormData();
-        formData.append('regionName', regionName);
-        formData.append('email', email);
+        formData.append('regionId', regionId);
         formData.append('firstName', firstName);
         formData.append('lastName', lastName);
-        formData.append('regionDescription', regionDescription);
-        formData.append('regionCode', regionCode);
-        formData.append('ownerAdminId', ownerAdminId);
+        formData.append('regionalAdminEmail', email);
         formData.append('regionComment', regionComment);
+        formData.append('regionalAdminMobileNumber', mobileNumber);
         const response = await fetch(
           `${apiBaseUrl}/api/v1/regions/create-regional-admin/`,
           {
@@ -214,7 +278,7 @@ export const CreateRegionalAdmin = () => {
             isClosable: true,
           });
           closeModal();
-          navigate('/dashboard/create-regional-admin');
+          // navigate('/dashboard/create-regional-admin');
           setIsLoading(false);
         }
       } catch (err: unknown) {
@@ -227,18 +291,70 @@ export const CreateRegionalAdmin = () => {
       }
     },
     [
-      regionName,
+      regionId,
       email,
       firstName,
       lastName,
-      regionDescription,
-      regionCode,
-      ownerAdminId,
+      mobileNumber,
       regionComment,
       toast,
       closeModal,
-      navigate,
+      // navigate,
     ],
+  );
+
+  const handleRegionSubmit = useCallback(
+    async (ev: React.FormEvent) => {
+      ev.preventDefault();
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const formData = new FormData();
+        formData.append('regionName', regionName);
+        if (localStorage.getItem('stateId') !== null) {
+          formData.append('stateId', localStorage.getItem('stateId')!);
+        }
+        formData.append('regionComment', regionComment);
+        const response = await fetch(
+          `${apiBaseUrl}/api/v1/regions/create-region/`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          },
+        );
+        const data = await response.json();
+        console.log(data);
+        if (!response.ok) {
+          toast({
+            title: `${data.message}`,
+            status: 'error',
+            isClosable: true,
+          });
+          setIsLoading(false);
+          throw new Error(data.detail);
+        } else {
+          toast({
+            title: `${data.message}`,
+            status: 'success',
+            isClosable: true,
+          });
+          closeModal();
+          // navigate('/dashboard/create-regional-admin');
+          setIsLoading(false);
+        }
+      } catch (err: unknown) {
+        console.error({ err });
+        toast({ title: `${err}`, status: 'error', isClosable: true });
+        setIsLoading(false);
+      } finally {
+        setIsLoading(false);
+        closeModal();
+      }
+    },
+    [regionName, regionComment, toast, closeModal],
   );
 
   const openReactivateModal = (id: number) => {
@@ -327,9 +443,21 @@ export const CreateRegionalAdmin = () => {
             fontWeight: 600,
           }}
         >
-          Regional Admins
+          Regions
         </h1>
         <div style={{ flexGrow: 1 }}></div>
+        <Button
+          type='submit'
+          bg='yellow.500'
+          color={'white'}
+          _hover={{
+            background: 'yellow.300',
+          }}
+          mr={2}
+          onClick={openRegionModal}
+        >
+          Add Region
+        </Button>
         <Button
           type='submit'
           bg='yellow.500'
@@ -344,7 +472,7 @@ export const CreateRegionalAdmin = () => {
       </div>
 
       <Box style={{ height: '87.5vh' }} p={4}>
-        {regionalAdminData ? (
+        {regionData ? (
           <>
             <TableContainer
               style={{
@@ -364,50 +492,137 @@ export const CreateRegionalAdmin = () => {
                   <Tr>
                     <Th>Region ID</Th>
                     <Th>Region Name</Th>
-                    <Th>Region Code</Th>
                     <Th>Region Comment</Th>
-                    <Th>Owner Name</Th>
                     <Th>Actions</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {regionalAdminData?.message.map((data, index) => (
+                  {regionData?.message.map((data, index) => (
                     <React.Fragment key={index}>
                       <Tr>
                         <Td>{data.region_id}</Td>
                         <Td>{data.region_name}</Td>
-                        <Td>{data.region_code}</Td>
                         <Td>{data.region_comment}</Td>
-                        <Td>{data.owner_name}</Td>
                         <Td>
-                          {data.user?.status === 2 && (
-                            <Button
-                              type='submit'
-                              bg='yellow.500'
-                              color={'white'}
-                              _hover={{
-                                background: 'yellow.300',
-                              }}
-                              onClick={() => openReactivateModal(data.user.id)}
-                            >
-                              Reactivate
-                            </Button>
-                          )}
-                          {data.user?.status === 1 && (
-                            <Button
-                              color='yellow.500'
-                              _hover={{
-                                background: 'yellow.500',
-                                color: 'white',
-                              }}
-                              variant='ghost'
-                              onClick={() => openSuspendModal(data.user.id)}
-                            >
-                              Suspend
-                            </Button>
-                          )}
+                          <Link
+                            onClick={() => handleToggleRow(data.region_id)}
+                            _hover={{
+                              color: 'yellow.500',
+                            }}
+                            textDecoration='underline'
+                          >
+                            {expandedRow === data.region_id ? (
+                              <div style={{ display: 'flex' }}>
+                                <FiChevronUp /> Hide Region Admins
+                              </div>
+                            ) : (
+                              <div style={{ display: 'flex' }}>
+                                <FiChevronDown /> See Region Admins
+                              </div>
+                            )}
+                          </Link>
                         </Td>
                       </Tr>
+                      {expandedRow === data.region_id && (
+                        <Tr>
+                          <Td colSpan={5} padding={0} borderBottom='none'>
+                            <Card w={['100%']} mt={2} mb={2}>
+                              <CardHeader>
+                                <Heading size='md'>Region Admins</Heading>
+                              </CardHeader>
+                              {regionalAdminData ? (
+                                <CardBody>
+                                  <TableContainer
+                                    style={{
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      justifyContent: 'center',
+                                      alignItems: 'center',
+                                    }}
+                                  >
+                                    <Table
+                                      variant='striped'
+                                      colorScheme='gray'
+                                      w={['100%', '100%', '80%', '80%']}
+                                      overflowX='visible'
+                                    >
+                                      <Thead>
+                                        <Tr>
+                                          <Th>Email</Th>
+                                          <Th>Name</Th>
+                                          <Th>Phone Number</Th>
+                                          <Th>Actions</Th>
+                                        </Tr>
+                                      </Thead>
+                                      <Tbody>
+                                        {regionalAdminData?.message.map(
+                                          (data, index) => (
+                                            <React.Fragment key={index}>
+                                              <Tr>
+                                                <Td>
+                                                  {data.regionalAdmin_email}
+                                                </Td>
+                                                <Td>
+                                                  {data.regionalAdmin_name}
+                                                </Td>
+                                                <Td>
+                                                  {
+                                                    data.regionalAdmin_mobileNumber
+                                                  }
+                                                </Td>
+                                                <Td>
+                                                  {data.user?.status === 2 && (
+                                                    <Button
+                                                      type='submit'
+                                                      bg='yellow.500'
+                                                      color={'white'}
+                                                      _hover={{
+                                                        background:
+                                                          'yellow.300',
+                                                      }}
+                                                      onClick={() =>
+                                                        openReactivateModal(
+                                                          data.user.id,
+                                                        )
+                                                      }
+                                                    >
+                                                      Reactivate
+                                                    </Button>
+                                                  )}
+                                                  {data.user?.status === 1 && (
+                                                    <Button
+                                                      color='yellow.500'
+                                                      _hover={{
+                                                        background:
+                                                          'yellow.500',
+                                                        color: 'white',
+                                                      }}
+                                                      variant='ghost'
+                                                      onClick={() =>
+                                                        openSuspendModal(
+                                                          data.user.id,
+                                                        )
+                                                      }
+                                                    >
+                                                      Suspend
+                                                    </Button>
+                                                  )}
+                                                </Td>
+                                              </Tr>
+                                            </React.Fragment>
+                                          ),
+                                        )}
+                                      </Tbody>
+                                    </Table>
+                                  </TableContainer>
+                                </CardBody>
+                              ) : (
+                                <Spinner size='lg' color='green.500' />
+                              )}
+                            </Card>
+                          </Td>
+                        </Tr>
+                      )}
                     </React.Fragment>
                   ))}
                 </Tbody>
@@ -438,15 +653,6 @@ export const CreateRegionalAdmin = () => {
               }}
               encType='multipart/form-data'
             >
-              <FormLabel>Region Name</FormLabel>
-              <Input
-                type='text'
-                value={regionName}
-                required={true}
-                onChange={(ev) => setRegionName(ev.currentTarget.value)}
-                mb={3}
-              />
-
               <FormLabel>Email Address</FormLabel>
               <Input
                 type='email'
@@ -475,38 +681,97 @@ export const CreateRegionalAdmin = () => {
                 mb={3}
               />
 
-              <FormLabel>Region Description</FormLabel>
+              <FormLabel>Mobile Number</FormLabel>
               <Input
                 type='text'
-                value={regionDescription}
+                value={mobileNumber}
                 required={true}
-                onChange={(ev) => setRegionDescription(ev.currentTarget.value)}
+                onChange={(ev) => setMobileNumber(ev.currentTarget.value)}
                 mb={3}
               />
 
-              <FormLabel>Region Code</FormLabel>
-              <Input
-                type='text'
-                value={regionCode}
-                required={true}
-                onChange={(ev) => setRegionCode(ev.currentTarget.value)}
-                mb={3}
-              />
-
-              <FormLabel>Owner Admin Id</FormLabel>
+              <FormLabel>Region</FormLabel>
               <Select
                 placeholder='Select option'
-                value={ownerAdminId || ''}
+                value={regionId || ''}
                 required={true}
-                onChange={(ev) => setOwnerAdminId(ev.currentTarget.value)}
+                onChange={(ev) => setRegionId(ev.currentTarget.value)}
                 mb={3}
               >
-                {ownerData?.message.map((item, index) => (
-                  <option key={index} value={item.owner_id}>
-                    {item.owner_name}
+                {regionData?.message.map((item, index) => (
+                  <option key={index} value={item.region_id}>
+                    {item.region_name}
                   </option>
                 ))}
               </Select>
+
+              <FormLabel>Region Comment</FormLabel>
+              <Textarea
+                required={true}
+                value={regionComment}
+                onChange={(ev) => setRegionComment(ev.currentTarget.value)}
+                mb={3}
+              />
+
+              <Button
+                type='submit'
+                w='100%'
+                bg='yellow.500'
+                color={'white'}
+                _hover={{
+                  background: 'yellow.300',
+                }}
+                style={{
+                  marginTop: 10,
+                }}
+                isLoading={isLoading}
+                loadingText='Loading'
+              >
+                Submit
+              </Button>
+            </form>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              color='yellow.500'
+              _hover={{
+                background: 'yellow.500',
+                color: 'white',
+              }}
+              variant='ghost'
+              onClick={closeModal}
+            >
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Modal isOpen={isRegionOpen} onClose={closeModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Add Region</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <form
+              onSubmit={handleRegionSubmit}
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                alignItems: 'center',
+                textAlign: 'center',
+                margin: 'auto',
+              }}
+              encType='multipart/form-data'
+            >
+              <FormLabel>Region Name</FormLabel>
+              <Input
+                type='text'
+                value={regionName}
+                required={true}
+                onChange={(ev) => setRegionName(ev.currentTarget.value)}
+                mb={3}
+              />
 
               <FormLabel>Region Comment</FormLabel>
               <Textarea

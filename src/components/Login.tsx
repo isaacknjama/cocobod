@@ -94,6 +94,7 @@ export const Login: React.FC = () => {
         localStorage.setItem('id', data.id);
         localStorage.setItem('edited_role', data.edited_role);
         localStorage.setItem('username', data.username);
+        localStorage.setItem('stateId', data.stateId);
       } catch (err: unknown) {
         console.error({ err });
         setError('Invalid username of password');
