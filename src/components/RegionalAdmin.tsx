@@ -202,7 +202,7 @@ export const CreateRegionalAdmin = () => {
     } else {
       setRegionalAdminData(null);
       setExpandedRow(ownerId);
-      localStorage.setItem('currentId', ownerId);
+      localStorage.setItem('currentId', ownerId.toString());
     }
   };
 
