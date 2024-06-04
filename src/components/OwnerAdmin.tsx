@@ -41,8 +41,26 @@ import { useNavigate } from 'react-router-dom';
 import { apiBaseUrl } from '../core/environment';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
+interface Owner {
+  owner_id: number;
+  owner_name: string;
+  owner_code: string;
+  batch_code_length: number;
+  owner_logo: string;
+  allow_incident_tracking: string;
+  include_district: string;
+  include_region: string;
+  owner_comment: string;
+  owner_description: string;
+  serialise_codes: string;
+}
+
+interface OwnerData {
+  message: Owner[];
+}
+
 export const CreateNewOwner = () => {
-  const [ownerData, setOwnerData] = useState();
+  const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
   const [ownerLogo, setOwnerLogo] = useState<File | null>(null);
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
