@@ -1,14 +1,13 @@
 import {
   Box,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
   Flex,
   FormLabel,
   Heading,
   Image,
   Input,
+  InputGroup,
+  InputLeftAddon,
   Link,
   Modal,
   ModalBody,
@@ -17,20 +16,13 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
   Select,
   Spinner,
   Stack,
-  StackDivider,
   Table,
   TableContainer,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
@@ -53,28 +45,41 @@ interface Owner {
   owner_comment: string;
   owner_description: string;
   serialise_codes: string;
+  owners: [];
 }
 
 interface OwnerData {
   message: Owner[];
 }
 
+interface State {
+  state_id: number;
+  name: string;
+  support_email: string;
+  support_mobileNumber: string;
+  logo: string;
+  description: string;
+}
+
+interface StateData {
+  message: State[];
+}
+
 export const CreateNewOwner = () => {
   const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
-  const [ownerLogo, setOwnerLogo] = useState<File | null>(null);
+  const [stateData, setStateData] = useState<StateData | null>(null);
+  const [ownerId, setOwnerId] = useState<number>(1);
+  const [stateId, setStateId] = useState<number>(1);
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [ownerDescription, setOwnerDescription] = useState('');
   const [ownerComment, setOwnerComment] = useState('');
   const [ownerCode, setOwnerCode] = useState('');
-  const [serializeCodes, setSerializeCodes] = useState<string>('');
-  const [allowIncidentTracking, setAllowIncidentTracking] =
-    useState<string>('');
-  const [batchCodeLength, setBatchCodeLength] = useState<number>(0);
+  const [owner_mobileNumber, setOwnerMobileNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [ownerDetails, setOwnerDetails] = useState<[] | null>();
+  // const [ownerDetails, setOwnerDetails] = useState<[] | null>();
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
   const toast = useToast();
@@ -84,19 +89,19 @@ export const CreateNewOwner = () => {
     async (ev: React.FormEvent) => {
       ev.preventDefault();
       setIsLoading(true);
+      setOwnerId(ownerId + 1);
+      setStateId(stateId + 1);
       try {
         const token = localStorage.getItem('token');
         const formData = new FormData();
-        formData.append('ownerLogo', ownerLogo as File);
+        formData.append('id', ownerId);
         formData.append('email', email);
         formData.append('firstName', firstName);
         formData.append('lastName', lastName);
         formData.append('ownerDescription', ownerDescription);
         formData.append('ownerComment', ownerComment);
         formData.append('ownerCode', ownerCode);
-        formData.append('serializeCodes', String(serializeCodes));
-        formData.append('allowIncidentTracking', String(allowIncidentTracking));
-        formData.append('batchCodeLength', String(batchCodeLength));
+        formData.append('owner_mobileNumber', owner_mobileNumber);
         const response = await fetch(
           `${apiBaseUrl}/api/v1/owner/create-owner/`,
           {
@@ -132,18 +137,17 @@ export const CreateNewOwner = () => {
       }
     },
     [
-      ownerLogo,
+      ownerId,
       email,
       firstName,
       lastName,
       ownerDescription,
       ownerComment,
       ownerCode,
-      serializeCodes,
-      allowIncidentTracking,
-      batchCodeLength,
       toast,
       navigate,
+      owner_mobileNumber,
+      stateId,
     ],
   );
 
@@ -162,17 +166,18 @@ export const CreateNewOwner = () => {
         throw new Error('Network response was not ok!');
       }
       const owners = await response.json();
+      console.log(owners);
       setOwnerData(owners);
     } catch (err) {
       console.error('Error fetching data: ', err);
     }
   }, [setOwnerData]);
 
-  const fetchOwnerDetails = async (ownerId: number) => {
+  const fetchStates = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/owner/describe-one-owner/${ownerId}/`,
+        `${apiBaseUrl}/api/v1/owner/list-all-states`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -182,24 +187,27 @@ export const CreateNewOwner = () => {
       if (!response.ok) {
         throw new Error('Network response was not ok!');
       }
-      const owner = await response.json();
-      setOwnerDetails(owner);
+      const states = await response.json();
+      console.log(states);
+      setStateData(states);
     } catch (err) {
       console.error('Error fetching data: ', err);
     }
-  };
+  }, [setStateData]);
+
+  useEffect(() => {
+    fetchStates();
+  }, [fetchStates]);
 
   useEffect(() => {
     fetchOwners();
   }, [fetchOwners]);
 
-  const handleToggleRow = async (ownerId: number) => {
-    if (expandedRow === ownerId) {
+  const handleToggleRow = async (stateId: number) => {
+    if (expandedRow === stateId) {
       setExpandedRow(null);
-      setOwnerDetails(null);
     } else {
-      setExpandedRow(ownerId);
-      await fetchOwnerDetails(ownerId);
+      setExpandedRow(stateId);
     }
   };
 
@@ -209,8 +217,68 @@ export const CreateNewOwner = () => {
 
   const closeModal = useCallback(() => {
     setIsOpen(false);
-    fetchOwners();
-  }, [fetchOwners]);
+    fetchStates();
+  }, [fetchStates]);
+
+  // const openReactivateModal = (id: number) => {
+  //   setCurrentId(id);
+  //   setReactivateIsOpen(true);
+  // };
+
+  // const reactivate = async () => {
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     setIsLoading(true);
+  //     const response = await fetch(
+  //       `${apiBaseUrl}/api/v1/regions/reactivate-regional-admin/${currentId}/`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+  //     if (!response.ok) {
+  //       setIsLoading(false);
+  //       throw new Error('Network response was not ok!');
+  //     }
+  //   } catch (err) {
+  //     console.error('Error fetching data: ', err);
+  //     setIsLoading(false);
+  //   } finally {
+  //     setIsLoading(false);
+  //     closeModal();
+  //   }
+  // };
+
+  // const openSuspendModal = (id: number) => {
+  //   setCurrentId(id);
+  //   setSuspendIsOpen(true);
+  // };
+
+  // const suspend = async () => {
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     setIsLoading(true);
+  //     const response = await fetch(
+  //       `${apiBaseUrl}/api/v1/regions/suspend-regional-admin/${currentId}/`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+  //     if (!response.ok) {
+  //       setIsLoading(false);
+  //       throw new Error('Network response was not ok!');
+  //     }
+  //   } catch (err) {
+  //     console.error('Error fetching data: ', err);
+  //     setIsLoading(false);
+  //   } finally {
+  //     setIsLoading(false);
+  //     closeModal();
+  //   }
+  // };
 
   return (
     <React.Fragment>
@@ -249,13 +317,25 @@ export const CreateNewOwner = () => {
             background: 'yellow.300',
           }}
           onClick={openModal}
+          mr={4}
+        >
+          Add State
+        </Button>
+        <Button
+          type='submit'
+          bg='yellow.500'
+          color={'white'}
+          _hover={{
+            background: 'yellow.300',
+          }}
+          onClick={openModal}
         >
           Add Owner Admin
         </Button>
       </div>
 
       <Box height='87.5vh' p={4}>
-        {ownerData ? (
+        {stateData ? (
           <>
             <TableContainer
               style={{
@@ -272,29 +352,33 @@ export const CreateNewOwner = () => {
               >
                 <Thead>
                   <Tr>
-                    <Th>Owner ID</Th>
-                    <Th>Owner Name</Th>
-                    <Th>Owner Code</Th>
-                    <Th>Batch Code Length</Th>
+                    <Th>Logo</Th>
+                    <Th>Name</Th>
+                    <Th>Support Email</Th>
+                    <Th>Support Mobile Number</Th>
+                    <Th>Description</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {ownerData?.message.map((data) => (
-                    <React.Fragment key={data.owner_id}>
+                  {stateData?.message.map((data, index) => (
+                    <React.Fragment key={`${data.state_id}-${index}`}>
                       <Tr>
-                        <Td>{data.owner_id}</Td>
-                        <Td>{data.owner_name}</Td>
-                        <Td>{data.owner_code}</Td>
-                        <Td>{data.batch_code_length}</Td>
+                        <Td>
+                          <Image src={data.logo} w={8} />
+                        </Td>
+                        <Td>{data.name}</Td>
+                        <Td>{data.support_email}</Td>
+                        <Td>{data.support_mobileNumber}</Td>
+                        <Td>{data.description}</Td>
                         <Td>
                           <Link
-                            onClick={() => handleToggleRow(data.owner_id)}
+                            onClick={() => handleToggleRow(data.state_id)}
                             _hover={{
                               color: 'yellow.500',
                             }}
                             textDecoration='underline'
                           >
-                            {expandedRow === data.owner_id ? (
+                            {expandedRow === data.state_id ? (
                               <FiChevronUp />
                             ) : (
                               <FiChevronDown />
@@ -302,73 +386,61 @@ export const CreateNewOwner = () => {
                           </Link>
                         </Td>
                       </Tr>
-                      {expandedRow === data.owner_id && (
-                        <Card w={['100%', '90%', '80%', '60%']} mt={2}>
-                          <CardHeader>
-                            <Heading size='md'>Owner Details</Heading>
-                          </CardHeader>
-                          {ownerDetails ? (
-                            <CardBody>
-                              <Flex gap={4} flexDirection='column'>
-                                <Heading size='s'>Owner Logo</Heading>
-                                <Box boxSize='sm'>
-                                  <Image
-                                    src={data.owner_logo}
-                                    objectFit='cover'
-                                    alt='Owner Logo'
-                                    boxSize={['100px', '150px']}
-                                  />
-
-                                  <Heading size='s'>
-                                    Allow Incident Tracking
-                                  </Heading>
-                                  <Text>
-                                    {data.allow_incident_tracking
-                                      ? 'True'
-                                      : 'False'}
-                                  </Text>
-                                </Box>
-                                <Box>
-                                  <Heading size='s'>Batch Code Length</Heading>
-                                  <Text>{data.batch_code_length}</Text>
-                                </Box>
-                                <Box>
-                                  <Heading size='s'>Include District</Heading>
-                                  <Text>
-                                    {data.include_district ? 'True' : 'False'}
-                                  </Text>
-                                </Box>
-                              </Flex>
-                              <Stack
-                                divider={<StackDivider />}
-                                flexDirection='row'
-                                gap={8}
-                                wrap='wrap'
-                              >
-                                <Box>
-                                  <Heading size='s'>Include Region</Heading>
-                                  <Text>
-                                    {data.include_region ? 'True' : 'False'}
-                                  </Text>
-                                </Box>
-                                <Box>
-                                  <Heading size='s'>Owner Comment</Heading>
-                                  <Text>{data.owner_comment}</Text>
-                                </Box>
-                                <Box>
-                                  <Heading size='s'>Owner Description</Heading>
-                                  <Text>{data.owner_description}</Text>
-                                </Box>
-                                <Box>
-                                  <Heading size='s'>Serialise Codes</Heading>
-                                  <Text>{data.serialise_codes}</Text>
-                                </Box>
-                              </Stack>
-                            </CardBody>
-                          ) : (
-                            <Spinner size='lg' color='green.500' />
-                          )}
-                        </Card>
+                      {expandedRow === data.state_id && (
+                        <Tr>
+                          <Td colSpan={6}>
+                            {ownerData ? (
+                              <Table variant='simple' size='sm' mt={2}>
+                                <Thead>
+                                  <Tr>
+                                    <Th>
+                                      <Heading size='s'>Owner Name</Heading>
+                                    </Th>
+                                    <Th>
+                                      <Heading size='s'>Mobile Number</Heading>
+                                    </Th>
+                                  </Tr>
+                                </Thead>
+                                <Tbody>
+                                  {ownerData &&
+                                    ownerData.message.map((data, index) => (
+                                      <React.Fragment key={index}>
+                                        {data.owners.map(
+                                          (owner, ownerIndex) => (
+                                            <Tr key={`${index}-${ownerIndex}`}>
+                                              <Td>{owner.owner_name}</Td>
+                                              <Td>
+                                                {owner.owner_mobileNumber}
+                                              </Td>
+                                              <Td>
+                                                <Button
+                                                  bg='none'
+                                                  _hover={{
+                                                    bg: 'yellow.500',
+                                                    color: '#FFF',
+                                                  }}
+                                                  variant='ghost'
+                                                  onClick={() =>
+                                                    openSuspendModal(
+                                                      data.owners?.id,
+                                                    )
+                                                  }
+                                                >
+                                                  Reactivate
+                                                </Button>
+                                              </Td>
+                                            </Tr>
+                                          ),
+                                        )}
+                                      </React.Fragment>
+                                    ))}
+                                </Tbody>
+                              </Table>
+                            ) : (
+                              <Spinner size='lg' color='green.500' />
+                            )}
+                          </Td>
+                        </Tr>
                       )}
                     </React.Fragment>
                   ))}
@@ -400,22 +472,6 @@ export const CreateNewOwner = () => {
               }}
               encType='multipart/form-data'
             >
-              <>
-                <FormLabel>Owner Logo</FormLabel>
-                <Input
-                  type='file'
-                  accept='image/png, image/jpeg'
-                  onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
-                    if (ev.target.files !== null) {
-                      setOwnerLogo(ev.target.files[0]);
-                    }
-                  }}
-                  style={{
-                    marginBottom: '4px',
-                  }}
-                />
-              </>
-
               <FormLabel>Email Address</FormLabel>
               <Input
                 type='email'
@@ -470,42 +526,23 @@ export const CreateNewOwner = () => {
                 mb={3}
               />
 
-              <FormLabel>Serialize Codes</FormLabel>
-              <Select
-                placeholder='Select option'
-                value={serializeCodes || ''}
-                onChange={(ev) => setSerializeCodes(ev.currentTarget.value)}
-                mb={3}
-              >
-                <option value='true'>True</option>
-                <option value='false'>False</option>
-              </Select>
+              <FormLabel>Mobile Number</FormLabel>
+              <Stack spacing={4} mb={5}>
+                <InputGroup>
+                  <InputLeftAddon>+254</InputLeftAddon>
+                  <Input
+                    type='tel'
+                    value={owner_mobileNumber}
+                    placeholder='Phone Number'
+                    onChange={(ev) =>
+                      setOwnerMobileNumber(ev.currentTarget.value)
+                    }
+                  />
+                </InputGroup>
+              </Stack>
 
-              <FormLabel>Allow Incident Tracking</FormLabel>
-              <Select
-                placeholder='Select option'
-                value={allowIncidentTracking}
-                onChange={(ev) =>
-                  setAllowIncidentTracking(ev.currentTarget.value)
-                }
-                mb={3}
-              >
-                <option value='True'>True</option>
-                <option value='False'>False</option>
-              </Select>
-
-              <FormLabel>Batch Code Length</FormLabel>
-              <NumberInput
-                value={batchCodeLength}
-                onChange={(value) => setBatchCodeLength(parseInt(value))}
-                mb={3}
-              >
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
+              <FormLabel>State</FormLabel>
+              <Select mb={5} placeholder='Pick state...' />
 
               <Button
                 type='submit'
