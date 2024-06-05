@@ -36,6 +36,7 @@ import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 interface Owner {
   owner_id: number;
   owner_name: string;
+  owner_mobileNumber: string;
   owner_code: string;
   batch_code_length: number;
   owner_logo: string;
@@ -45,7 +46,7 @@ interface Owner {
   owner_comment: string;
   owner_description: string;
   serialise_codes: string;
-  owners: [];
+  owners: Owner[];
 }
 
 interface OwnerData {
@@ -94,7 +95,7 @@ export const CreateNewOwner = () => {
       try {
         const token = localStorage.getItem('token');
         const formData = new FormData();
-        formData.append('id', ownerId);
+        formData.append('id', ownerId.toString());
         formData.append('email', email);
         formData.append('firstName', firstName);
         formData.append('lastName', lastName);
@@ -420,11 +421,6 @@ export const CreateNewOwner = () => {
                                                     color: '#FFF',
                                                   }}
                                                   variant='ghost'
-                                                  onClick={() =>
-                                                    openSuspendModal(
-                                                      data.owners?.id,
-                                                    )
-                                                  }
                                                 >
                                                   Reactivate
                                                 </Button>
