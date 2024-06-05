@@ -125,7 +125,12 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           <NavItem key={link.name} icon={link.icon} url={link.url}>
             {link.name}
           </NavItem>
-        ) : role === 'owner_admin' ? (
+        ) : role === 'owner_admin' &&
+          (link.name === 'Dashboard' ||
+            link.name === 'Settings' ||
+            link.name === 'Regions' ||
+            link.name === 'Districts' ||
+            link.name === 'Farms') ? (
           <NavItem key={link.name} icon={link.icon} url={link.url}>
             {link.name}
           </NavItem>
