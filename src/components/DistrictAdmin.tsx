@@ -1,4 +1,8 @@
 import {
+  // Menu,
+  // MenuButton,
+  // MenuList,
+  // MenuItem,
   Card,
   CardBody,
   CardHeader,
@@ -99,6 +103,18 @@ export const CreateDistrictAdmin = () => {
     message: District[];
   }
 
+  interface Region {
+    region_id: number;
+    region_name: string;
+    region_code: string;
+    region_comment: string;
+    state: number;
+  }
+
+  interface RegionData {
+    message: Region[];
+  }
+
   const [districtName, setDistrictName] = useState('');
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -107,6 +123,7 @@ export const CreateDistrictAdmin = () => {
   const [description, setdescription] = useState('');
   const [districtComment, setDistrictComment] = useState('');
   const [districtId, setdistrictId] = useState('');
+  const [regionId, setregionId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -117,20 +134,80 @@ export const CreateDistrictAdmin = () => {
   const [currentId, setCurrentId] = useState<number>();
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
+  const [regionFilterId, setregionFilterId] = useState('');
+
   const [districtAdminData, setDistrictAdminData] =
     useState<DistrictAdminData | null>();
   const [districtData, setDistrictData] = useState<DistrictData | null>();
 
+  const [regionData, setRegionData] = useState<RegionData | null>();
+
+  // const [searchTerm, setSearchTerm] = useState('');
+  // const [selectedOption, setSelectedOption] = useState('');
+
+  // const handleSelect = (option: string) => {
+  //   setSelectedOption(option);
+  //   setSearchTerm('');
+  // };
+
+  // const [filteredOptions, setfilteredOptions] = useState<string[] | null>();
+
+  // let filteredOptions= [];
+
+  // useEffect(() => {
+  //   if (searchTerm !== null && regionData !== null) {
+  //     setfilteredOptions(
+  //       regionData?.message
+  //         .filter((option: Region) =>
+  //           option.region_name.toLowerCase().includes(searchTerm.toLowerCase()),
+  //         )
+  //         ?.map((element: Region) => element.region_name),
+  //     );
+  //   }
+  // }, [regionData, searchTerm]);
+
   const toast = useToast();
   const navigate = useNavigate();
 
-  const fetchDistricts = async () => {
+  const role = localStorage.getItem('role');
+
+  const fetchRegions = async () => {
     try {
       const token = localStorage.getItem('token');
-      const id = localStorage.getItem('regionId');
+      const id = localStorage.getItem('stateId');
       setIsLoading(true);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/district/list-all-districts/${id}`,
+        `${apiBaseUrl}/api/v1/regions/list-all-regions/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        setIsLoading(false);
+        throw new Error('Network response was not ok!');
+      }
+      const regions = await response.json();
+      localStorage.setItem('regionFilterId', regions.message[0].region_id);
+      setregionFilterId(regions.message[0].region_id);
+      setRegionData(regions);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error fetching data: ', err);
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchDistricts = async (value: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      // const id = localStorage.getItem('regionId');
+      setIsLoading(true);
+      const response = await fetch(
+        `${apiBaseUrl}/api/v1/district/list-all-districts/${value}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -150,6 +227,20 @@ export const CreateDistrictAdmin = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleFectDistricts = async (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setregionFilterId(event.target.value);
+    await fetchDistricts(event.target.value);
+  };
+
+  const handleFectDistrictsModal = async (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setregionId(event.target.value);
+    await fetchDistricts(event.target.value);
   };
 
   const fetchDistrictAdmins = async () => {
@@ -206,10 +297,12 @@ export const CreateDistrictAdmin = () => {
 
   const openDistrictModal = () => {
     setIsDistrictOpen(true);
+    localStorage.setItem('regionFilterId', regionFilterId);
   };
 
   const openModal = () => {
     setIsOpen(true);
+    localStorage.setItem('regionFilterId', regionFilterId);
   };
 
   const closeModal = useCallback(async () => {
@@ -217,9 +310,15 @@ export const CreateDistrictAdmin = () => {
     setSuspendIsOpen(false);
     setReactivateIsOpen(false);
     setIsDistrictOpen(false);
-    await fetchDistricts();
-    await fetchDistrictAdmins();
-  }, []);
+    if (role === 'owner_admin') {
+      await fetchDistricts(localStorage.getItem('regionFilterId')!.toString());
+    } else {
+      await fetchDistricts(localStorage.getItem('regionId')!);
+    }
+    if (localStorage.getItem('currentId') !== null) {
+      await fetchDistrictAdmins();
+    }
+  }, [role]);
 
   const handleToggleRow = async (ownerId: number) => {
     if (expandedRow === ownerId) {
@@ -233,8 +332,14 @@ export const CreateDistrictAdmin = () => {
   };
 
   useEffect(() => {
-    fetchDistricts();
-  }, []);
+    fetchRegions().then(() => {
+      if (role === 'owner_admin') {
+        fetchDistricts(localStorage.getItem('regionFilterId')!.toString());
+      } else {
+        fetchDistricts(localStorage.getItem('regionId')!);
+      }
+    });
+  }, [role]);
 
   useEffect(() => {
     if (expandedRow !== null) {
@@ -258,8 +363,12 @@ export const CreateDistrictAdmin = () => {
         if (localStorage.getItem('id') !== null) {
           formData.append('ownerAdminId', localStorage.getItem('id')!);
         }
-        if (localStorage.getItem('regionId') !== null) {
-          formData.append('regionalAdmin', localStorage.getItem('regionId')!);
+        if (role === 'owner_admin') {
+          formData.append('regionalAdmin', regionId);
+        } else {
+          if (localStorage.getItem('regionId') !== null) {
+            formData.append('regionalAdmin', localStorage.getItem('regionId')!);
+          }
         }
         const response = await fetch(
           `${apiBaseUrl}/api/v1/district/create-district-user/`,
@@ -306,6 +415,8 @@ export const CreateDistrictAdmin = () => {
       mobileNumber,
       description,
       toast,
+      regionId,
+      role,
       closeModal,
       navigate,
       districtId,
@@ -323,8 +434,12 @@ export const CreateDistrictAdmin = () => {
         if (localStorage.getItem('stateId') !== null) {
           formData.append('stateId', localStorage.getItem('stateId')!);
         }
-        if (localStorage.getItem('regionId') !== null) {
-          formData.append('regionId', localStorage.getItem('regionId')!);
+        if (role === 'owner_admin') {
+          formData.append('regionId', regionId);
+        } else {
+          if (localStorage.getItem('regionId') !== null) {
+            formData.append('regionId', localStorage.getItem('regionId')!);
+          }
         }
         formData.append('districtComment', districtComment);
         const response = await fetch(
@@ -365,12 +480,13 @@ export const CreateDistrictAdmin = () => {
         closeModal();
       }
     },
-    [districtName, districtComment, toast, closeModal],
+    [districtName, districtComment, toast, regionId, role, closeModal],
   );
 
   const openReactivateModal = (id: number) => {
     setCurrentId(id);
     setReactivateIsOpen(true);
+    localStorage.setItem('regionFilterId', regionFilterId);
   };
 
   const reactivate = async () => {
@@ -401,6 +517,7 @@ export const CreateDistrictAdmin = () => {
   const openSuspendModal = (id: number) => {
     setCurrentId(id);
     setSuspendIsOpen(true);
+    localStorage.setItem('regionFilterId', regionFilterId);
   };
 
   const suspend = async () => {
@@ -457,6 +574,45 @@ export const CreateDistrictAdmin = () => {
           District Admin
         </h1>
         <div style={{ flexGrow: 1 }}></div>
+        {/* <Box width='300px' mr={2}>
+          <Menu>
+            <MenuButton as={Button} rightIcon={<FiChevronDown />} width='100%'>
+              {selectedOption || 'Search Region'}
+            </MenuButton>
+            {filteredOptions !== null && (
+              <MenuList>
+                <Box px='4' pb='2'>
+                  <Input
+                    placeholder='Search...'
+                    value={searchTerm}
+                    onChange={(ev) => setSearchTerm(ev.currentTarget.value)}
+                    mb='2'
+                  />
+                </Box>
+                {filteredOptions?.map((option, index) => (
+                  <MenuItem key={index} onClick={() => handleSelect(option)}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            )}
+          </Menu>
+        </Box> */}
+        {role === 'owner_admin' && (
+          <Select
+            placeholder='Select option'
+            value={regionFilterId}
+            required={true}
+            onChange={handleFectDistricts}
+            mr={2}
+          >
+            {regionData?.message.map((item, index) => (
+              <option key={index} value={item.region_id}>
+                {item.region_name}
+              </option>
+            ))}
+          </Select>
+        )}
         <Button
           type='submit'
           bg='yellow.500'
@@ -705,6 +861,25 @@ export const CreateDistrictAdmin = () => {
                 mb={3}
               />
 
+              {role === 'owner_admin' && (
+                <>
+                  <FormLabel>Region</FormLabel>
+                  <Select
+                    placeholder='Select option'
+                    value={regionId}
+                    required={true}
+                    onChange={handleFectDistrictsModal}
+                    mb={3}
+                  >
+                    {regionData?.message.map((item, index) => (
+                      <option key={index} value={item.region_id}>
+                        {item.region_name}
+                      </option>
+                    ))}
+                  </Select>
+                </>
+              )}
+
               <FormLabel>District</FormLabel>
               <Select
                 placeholder='Select option'
@@ -787,6 +962,25 @@ export const CreateDistrictAdmin = () => {
                 onChange={(ev) => setDistrictName(ev.currentTarget.value)}
                 mb={3}
               />
+
+              {role === 'owner_admin' && (
+                <>
+                  <FormLabel>Region</FormLabel>
+                  <Select
+                    placeholder='Select option'
+                    value={regionId}
+                    required={true}
+                    onChange={(ev) => setregionId(ev.currentTarget.value)}
+                    mb={3}
+                  >
+                    {regionData?.message.map((item, index) => (
+                      <option key={index} value={item.region_id}>
+                        {item.region_name}
+                      </option>
+                    ))}
+                  </Select>
+                </>
+              )}
 
               <FormLabel>District Comment</FormLabel>
               <Textarea
