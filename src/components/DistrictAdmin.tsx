@@ -1,4 +1,9 @@
 import {
+  Card,
+  CardBody,
+  CardHeader,
+  Link,
+  Heading,
   Box,
   Button,
   Flex,
@@ -26,25 +31,26 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiBaseUrl } from '../core/environment';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 export const CreateDistrictAdmin = () => {
-  interface Owner {
-    owner_id: number;
-    owner_name: string;
-    owner_code: string;
-    batch_code_length: number;
-    owner_logo: string;
-    allow_incident_tracking: string;
-    include_district: string;
-    include_region: string;
-    owner_comment: string;
-    owner_description: string;
-    serialise_codes: string;
-  }
+  // interface Owner {
+  //   owner_id: number;
+  //   owner_name: string;
+  //   owner_code: string;
+  //   batch_code_length: number;
+  //   owner_logo: string;
+  //   allow_incident_tracking: string;
+  //   include_district: string;
+  //   include_region: string;
+  //   owner_comment: string;
+  //   owner_description: string;
+  //   serialise_codes: string;
+  // }
 
-  interface OwnerData {
-    message: Owner[];
-  }
+  // interface OwnerData {
+  //   message: Owner[];
+  // }
 
   interface UserData {
     id: number;
@@ -69,11 +75,11 @@ export const CreateDistrictAdmin = () => {
   }
 
   interface DistrictAdmin {
-    district_id: number;
-    district_name: string;
-    district_code: string;
-    district_comment: string;
-    owner: Owner;
+    districtAdmin_description: string;
+    districtAdmin_email: string;
+    districtAdmin_mobileNumber: string;
+    districtAdmin_name: string;
+    id: number;
     user: UserData;
   }
 
@@ -81,34 +87,77 @@ export const CreateDistrictAdmin = () => {
     message: DistrictAdmin[];
   }
 
+  interface District {
+    district_id: number;
+    district_name: string;
+    district_code: string;
+    district_comment: string;
+    user: UserData;
+  }
+
+  interface DistrictData {
+    message: District[];
+  }
+
   const [districtName, setDistrictName] = useState('');
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [districtCode, setDistrictCode] = useState('');
-  const [ownerAdminId, setOwnerAdminId] = useState('');
+  const [mobileNumber, setmobileNumber] = useState('');
+  const [description, setdescription] = useState('');
   const [districtComment, setDistrictComment] = useState('');
-  const [regionalAdmin, setRegionalAdmin] = useState('');
+  const [districtId, setdistrictId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  const [isDistrictOpen, setIsDistrictOpen] = useState(false);
+
   const [isSuspendOpen, setSuspendIsOpen] = useState(false);
   const [isReactivateOpen, setReactivateIsOpen] = useState(false);
   const [currentId, setCurrentId] = useState<number>();
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
-  const [ownerData, setOwnerData] = useState<OwnerData>();
-  // const [regionalAdminData, setRegionalAdminData] = useState<RegionalAdmin[]>();
   const [districtAdminData, setDistrictAdminData] =
-    useState<DistrictAdminData>();
+    useState<DistrictAdminData | null>();
+  const [districtData, setDistrictData] = useState<DistrictData | null>();
 
   const toast = useToast();
   const navigate = useNavigate();
+
+  const fetchDistricts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const id = localStorage.getItem('regionId');
+      setIsLoading(true);
+      const response = await fetch(
+        `${apiBaseUrl}/api/v1/district/list-all-districts/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        setIsLoading(false);
+        throw new Error('Network response was not ok!');
+      }
+      const regions = await response.json();
+      setDistrictData(regions);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error fetching data: ', err);
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchDistrictAdmins = async () => {
     try {
       const token = localStorage.getItem('token');
       setIsLoading(true);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/district/list-all-district-user/`,
+        `${apiBaseUrl}/api/v1/district/list-all-district-user/${localStorage.getItem('currentId')}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -130,74 +179,68 @@ export const CreateDistrictAdmin = () => {
     }
   };
 
-  //   const fetchDistrictAdminById = async () => {
-  //     try {
-  //       const token = localStorage.getItem('token');
-  //       const id = localStorage.getItem('id');
-  //       setIsLoading(true);
-  //       const response = await fetch(
-  //         `${apiBaseUrl}/api/v1/regions/list-all-district-user/${id}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
+  // const fetchOwners = async () => {
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     setIsLoading(true);
+  //     const response = await fetch(
+  //       `${apiBaseUrl}/api/v1/owner/list-all-owners/`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
   //         },
-  //       );
-  //       if (!response.ok) {
-  //         setIsLoading(false);
-  //         throw new Error('Network response was not ok!');
-  //       }
-  //       const districtAdmins = await response.json();
-  //       setDistrictAdminData(districtAdmins);
+  //       },
+  //     );
+  //     if (!response.ok) {
   //       setIsLoading(false);
-  //     } catch (err) {
-  //       console.error('Error fetching data: ', err);
-  //       setIsLoading(false);
-  //     } finally {
-  //       setIsLoading(false);
+  //       throw new Error('Network response was not ok!');
   //     }
-  //   };
+  //     const owners = await response.json();
+  //     setOwnerData(owners);
+  //     setIsLoading(false);
+  //   } catch (err) {
+  //     console.error('Error fetching data: ', err);
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  const fetchOwners = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      setIsLoading(true);
-      const response = await fetch(
-        `${apiBaseUrl}/api/v1/owner/list-all-owners/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        setIsLoading(false);
-        throw new Error('Network response was not ok!');
-      }
-      const owners = await response.json();
-      setOwnerData(owners);
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Error fetching data: ', err);
-      setIsLoading(false);
-    }
+  const openDistrictModal = () => {
+    setIsDistrictOpen(true);
   };
 
   const openModal = () => {
     setIsOpen(true);
-    fetchOwners();
   };
 
-  const closeModal = useCallback(() => {
+  const closeModal = useCallback(async () => {
     setIsOpen(false);
     setSuspendIsOpen(false);
     setReactivateIsOpen(false);
-    fetchDistrictAdmins();
+    setIsDistrictOpen(false);
+    await fetchDistricts();
+    await fetchDistrictAdmins();
+  }, []);
+
+  const handleToggleRow = async (ownerId: number) => {
+    if (expandedRow === ownerId) {
+      setExpandedRow(null);
+      setDistrictAdminData(null);
+    } else {
+      setDistrictAdminData(null);
+      setExpandedRow(ownerId);
+      localStorage.setItem('currentId', ownerId.toString());
+    }
+  };
+
+  useEffect(() => {
+    fetchDistricts();
   }, []);
 
   useEffect(() => {
-    fetchDistrictAdmins();
-  }, []);
+    if (expandedRow !== null) {
+      fetchDistrictAdmins();
+    }
+  }, [expandedRow]);
 
   const handleSubmit = useCallback(
     async (ev: React.FormEvent) => {
@@ -206,15 +249,18 @@ export const CreateDistrictAdmin = () => {
       try {
         const token = localStorage.getItem('token');
         const formData = new FormData();
-        formData.append('districtName', districtName);
         formData.append('firstName', firstName);
         formData.append('lastName', lastName);
-        formData.append('email', email);
-        formData.append('districtComment', districtComment);
-        formData.append('districtCode', districtCode);
-        formData.append('ownerAdminId', ownerAdminId);
-        formData.append('regionalAdmin', regionalAdmin);
-
+        formData.append('districtAdminEmail', email);
+        formData.append('districtAdmin_description', description);
+        formData.append('districtAdmin_mobileNumber', mobileNumber);
+        formData.append('districtId', districtId);
+        if (localStorage.getItem('id') !== null) {
+          formData.append('ownerAdminId', localStorage.getItem('id')!);
+        }
+        if (localStorage.getItem('regionId') !== null) {
+          formData.append('regionalAdmin', localStorage.getItem('regionId')!);
+        }
         const response = await fetch(
           `${apiBaseUrl}/api/v1/district/create-district-user/`,
           {
@@ -242,7 +288,7 @@ export const CreateDistrictAdmin = () => {
             isClosable: true,
           });
           closeModal();
-          navigate('/dashboard/create-regional-admin');
+          navigate('/dashboard/district-admin');
           setIsLoading(false);
         }
       } catch (err: unknown) {
@@ -254,18 +300,72 @@ export const CreateDistrictAdmin = () => {
       }
     },
     [
-      districtName,
       email,
       firstName,
       lastName,
-      districtCode,
-      ownerAdminId,
-      districtComment,
+      mobileNumber,
+      description,
       toast,
       closeModal,
       navigate,
-      regionalAdmin,
+      districtId,
     ],
+  );
+
+  const handleDistrictSubmit = useCallback(
+    async (ev: React.FormEvent) => {
+      ev.preventDefault();
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const formData = new FormData();
+        formData.append('districtName', districtName);
+        if (localStorage.getItem('stateId') !== null) {
+          formData.append('stateId', localStorage.getItem('stateId')!);
+        }
+        if (localStorage.getItem('regionId') !== null) {
+          formData.append('regionId', localStorage.getItem('regionId')!);
+        }
+        formData.append('districtComment', districtComment);
+        const response = await fetch(
+          `${apiBaseUrl}/api/v1/district/create-district/`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          },
+        );
+        const data = await response.json();
+        console.log(data);
+        if (!response.ok) {
+          toast({
+            title: `${data.message}`,
+            status: 'error',
+            isClosable: true,
+          });
+          setIsLoading(false);
+          throw new Error(data.detail);
+        } else {
+          toast({
+            title: `${data.message}`,
+            status: 'success',
+            isClosable: true,
+          });
+          closeModal();
+          setIsLoading(false);
+        }
+      } catch (err: unknown) {
+        console.error({ err });
+        toast({ title: `${err}`, status: 'error', isClosable: true });
+        setIsLoading(false);
+      } finally {
+        setIsLoading(false);
+        closeModal();
+      }
+    },
+    [districtName, districtComment, toast, closeModal],
   );
 
   const openReactivateModal = (id: number) => {
@@ -278,7 +378,7 @@ export const CreateDistrictAdmin = () => {
       const token = localStorage.getItem('token');
       setIsLoading(true);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/regions/reactivate-regional-admin/${currentId}/`,
+        `${apiBaseUrl}/api/v1/district/reactivate-district-user/${currentId}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -308,7 +408,7 @@ export const CreateDistrictAdmin = () => {
       const token = localStorage.getItem('token');
       setIsLoading(true);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/regions/suspend-regional-admin/${currentId}/`,
+        `${apiBaseUrl}/api/v1/district/suspend-district-user/${currentId}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -364,6 +464,18 @@ export const CreateDistrictAdmin = () => {
           _hover={{
             background: 'yellow.300',
           }}
+          mr={2}
+          onClick={openDistrictModal}
+        >
+          Add District
+        </Button>
+        <Button
+          type='submit'
+          bg='yellow.500'
+          color={'white'}
+          _hover={{
+            background: 'yellow.300',
+          }}
           onClick={openModal}
         >
           Add District Admin
@@ -371,7 +483,7 @@ export const CreateDistrictAdmin = () => {
       </div>
 
       <Box style={{ height: '87.5vh' }}>
-        {districtAdminData ? (
+        {districtData ? (
           <>
             <TableContainer
               style={{
@@ -392,50 +504,137 @@ export const CreateDistrictAdmin = () => {
                   <Tr>
                     <Th>District ID</Th>
                     <Th>District Name</Th>
-                    <Th>District Code</Th>
                     <Th>District Comment</Th>
-                    <Th>Owner Name</Th>
                     <Th>Actions</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {districtAdminData?.message.map((data, index) => (
+                  {districtData?.message.map((data, index) => (
                     <React.Fragment key={index}>
                       <Tr>
                         <Td>{data.district_id}</Td>
                         <Td>{data.district_name}</Td>
-                        <Td>{data.district_code}</Td>
                         <Td>{data.district_comment}</Td>
-                        <Td>{data.owner?.owner_name}</Td>
                         <Td>
-                          {data.user?.status === 2 && (
-                            <Button
-                              type='submit'
-                              bg='yellow.500'
-                              color={'white'}
-                              _hover={{
-                                background: 'yellow.300',
-                              }}
-                              onClick={() => openReactivateModal(data.user.id)}
-                            >
-                              Reactivate
-                            </Button>
-                          )}
-                          {data.user?.status === 1 && (
-                            <Button
-                              color='yellow.500'
-                              _hover={{
-                                background: 'yellow.500',
-                                color: 'white',
-                              }}
-                              variant='ghost'
-                              onClick={() => openSuspendModal(data.user.id)}
-                            >
-                              Suspend
-                            </Button>
-                          )}
+                          <Link
+                            onClick={() => handleToggleRow(data.district_id)}
+                            _hover={{
+                              color: 'yellow.500',
+                            }}
+                            textDecoration='underline'
+                          >
+                            {expandedRow === data.district_id ? (
+                              <div style={{ display: 'flex' }}>
+                                <FiChevronUp /> Hide Region Admins
+                              </div>
+                            ) : (
+                              <div style={{ display: 'flex' }}>
+                                <FiChevronDown /> See Region Admins
+                              </div>
+                            )}
+                          </Link>
                         </Td>
                       </Tr>
+                      {expandedRow === data.district_id && (
+                        <Tr>
+                          <Td colSpan={5} padding={0} borderBottom='none'>
+                            <Card w={['100%']} mt={2} mb={2}>
+                              <CardHeader>
+                                <Heading size='md'>District Admins</Heading>
+                              </CardHeader>
+                              {districtAdminData ? (
+                                <CardBody>
+                                  <TableContainer
+                                    style={{
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      justifyContent: 'center',
+                                      alignItems: 'center',
+                                    }}
+                                  >
+                                    <Table
+                                      variant='striped'
+                                      colorScheme='gray'
+                                      w={['100%', '100%', '80%', '80%']}
+                                      overflowX='visible'
+                                    >
+                                      <Thead>
+                                        <Tr>
+                                          <Th>Email</Th>
+                                          <Th>Name</Th>
+                                          <Th>Phone Number</Th>
+                                          <Th>Actions</Th>
+                                        </Tr>
+                                      </Thead>
+                                      <Tbody>
+                                        {districtAdminData?.message.map(
+                                          (data, index) => (
+                                            <React.Fragment key={index}>
+                                              <Tr>
+                                                <Td>
+                                                  {data.districtAdmin_email}
+                                                </Td>
+                                                <Td>
+                                                  {data.districtAdmin_name}
+                                                </Td>
+                                                <Td>
+                                                  {
+                                                    data.districtAdmin_mobileNumber
+                                                  }
+                                                </Td>
+                                                <Td>
+                                                  {data.user?.status === 2 && (
+                                                    <Button
+                                                      type='submit'
+                                                      bg='yellow.500'
+                                                      color={'white'}
+                                                      _hover={{
+                                                        background:
+                                                          'yellow.300',
+                                                      }}
+                                                      onClick={() =>
+                                                        openReactivateModal(
+                                                          data.user.id,
+                                                        )
+                                                      }
+                                                    >
+                                                      Reactivate
+                                                    </Button>
+                                                  )}
+                                                  {data.user?.status === 1 && (
+                                                    <Button
+                                                      color='yellow.500'
+                                                      _hover={{
+                                                        background:
+                                                          'yellow.500',
+                                                        color: 'white',
+                                                      }}
+                                                      variant='ghost'
+                                                      onClick={() =>
+                                                        openSuspendModal(
+                                                          data.user.id,
+                                                        )
+                                                      }
+                                                    >
+                                                      Suspend
+                                                    </Button>
+                                                  )}
+                                                </Td>
+                                              </Tr>
+                                            </React.Fragment>
+                                          ),
+                                        )}
+                                      </Tbody>
+                                    </Table>
+                                  </TableContainer>
+                                </CardBody>
+                              ) : (
+                                <Spinner size='lg' color='green.500' />
+                              )}
+                            </Card>
+                          </Td>
+                        </Tr>
+                      )}
                     </React.Fragment>
                   ))}
                 </Tbody>
@@ -452,7 +651,7 @@ export const CreateDistrictAdmin = () => {
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Add Regional Admin</ModalHeader>
+          <ModalHeader>Add District Admin</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <form
@@ -466,16 +665,6 @@ export const CreateDistrictAdmin = () => {
               }}
               encType='multipart/form-data'
             >
-              <FormLabel>District Name</FormLabel>
-              <Input
-                type='text'
-                placeholder='Enter district name'
-                value={districtName}
-                required={true}
-                onChange={(ev) => setDistrictName(ev.currentTarget.value)}
-                mb={3}
-              />
-
               <FormLabel>Email Address</FormLabel>
               <Input
                 type='email'
@@ -506,45 +695,98 @@ export const CreateDistrictAdmin = () => {
                 mb={3}
               />
 
-              <FormLabel>District Code</FormLabel>
+              <FormLabel>Mobile Number</FormLabel>
               <Input
                 placeholder='Enter district code'
                 type='text'
-                value={districtCode}
+                value={mobileNumber}
                 required={true}
-                onChange={(ev) => setDistrictCode(ev.currentTarget.value)}
+                onChange={(ev) => setmobileNumber(ev.currentTarget.value)}
                 mb={3}
               />
 
-              <FormLabel>Owner Admin Id</FormLabel>
+              <FormLabel>District</FormLabel>
               <Select
                 placeholder='Select option'
-                value={ownerAdminId || ''}
+                value={districtId}
                 required={true}
-                onChange={(ev) => setOwnerAdminId(ev.currentTarget.value)}
+                onChange={(ev) => setdistrictId(ev.currentTarget.value)}
                 mb={3}
               >
-                {ownerData?.message.map((item, index) => (
-                  <option key={index} value={item.owner_id}>
-                    {item.owner_name}
+                {districtData?.message.map((item, index) => (
+                  <option key={index} value={item.district_id}>
+                    {item.district_name}
                   </option>
                 ))}
               </Select>
 
-              <FormLabel>Regional Admin Id</FormLabel>
-              <Select
-                placeholder='Select option'
-                value={regionalAdmin}
+              <FormLabel>Description</FormLabel>
+              <Textarea
                 required={true}
-                onChange={(ev) => setRegionalAdmin(ev.currentTarget.value)}
+                value={description}
+                onChange={(ev) => setdescription(ev.currentTarget.value)}
                 mb={3}
+              />
+
+              <Button
+                type='submit'
+                w='100%'
+                bg='yellow.500'
+                color={'white'}
+                _hover={{
+                  background: 'yellow.300',
+                }}
+                style={{
+                  marginTop: 10,
+                }}
+                isLoading={isLoading}
+                loadingText='Loading'
               >
-                {ownerData?.message.map((item, index) => (
-                  <option key={index} value={item.owner_id}>
-                    {item.owner_name}
-                  </option>
-                ))}
-              </Select>
+                Submit
+              </Button>
+            </form>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              color='yellow.500'
+              _hover={{
+                background: 'yellow.500',
+                color: 'white',
+              }}
+              variant='ghost'
+              onClick={closeModal}
+            >
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Modal isOpen={isDistrictOpen} onClose={closeModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Add District</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <form
+              onSubmit={handleDistrictSubmit}
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                alignItems: 'center',
+                textAlign: 'center',
+                margin: 'auto',
+              }}
+              encType='multipart/form-data'
+            >
+              <FormLabel>District Name</FormLabel>
+              <Input
+                type='text'
+                value={districtName}
+                required={true}
+                onChange={(ev) => setDistrictName(ev.currentTarget.value)}
+                mb={3}
+              />
 
               <FormLabel>District Comment</FormLabel>
               <Textarea

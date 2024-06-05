@@ -3,39 +3,65 @@ import React from 'react';
 
 export const DashboardStatistics = () => {
   const username = localStorage.getItem('username');
+  const role = localStorage.getItem('role');
 
   return (
     <React.Fragment>
-      <Text fontSize={['xl', '2xl']}>Hello {username}, welcome!</Text>
-      <Flex
-        gap={12}
-        justifyContent='center'
-        align='center'
-        height='84vh'
-        flexDirection={['column', 'row']}
-        // flexWrap='wrap'
-      >
-        {[
-          'State',
-          'Owner Admin',
-          'Region Admin',
-          'District Admin',
-          'Destination Admin',
-        ].map((adminType) => (
-          <Card key={adminType} w='100%'>
+      <Text fontSize='2xl'>Hello {username} 👋, Welcome Back!</Text>
+      <Flex gap={12} justifyContent='center' align='center' height='84vh'>
+        {role === 'super_admin' && (
+          <Card size='lg' width='25vh' variant='outline'>
             <CardBody>
               <Center>
                 <Text>1</Text>
               </Center>
-              <Center mb={4}>
-                <Text>{adminType}</Text>
-              </Center>
               <Center>
-                <Button>Create {adminType}</Button>
+                <Text>Owner Admins</Text>
               </Center>
             </CardBody>
           </Card>
-        ))}
+        )}
+
+        {role === 'owner_admin' && (
+          <Card size='lg' width='25vh' variant='outline'>
+            <CardBody>
+              <Center>
+                <Text>1</Text>
+              </Center>
+              <Center>
+                <Text>Region Admins</Text>
+              </Center>
+            </CardBody>
+          </Card>
+        )}
+
+        {(role === 'owner_admin' || role === 'regional_admin') && (
+          <Card size='lg' width='25vh' variant='outline'>
+            <CardBody>
+              <Center>
+                <Text>1</Text>
+              </Center>
+              <Center>
+                <Text>District Admins</Text>
+              </Center>
+            </CardBody>
+          </Card>
+        )}
+
+        {(role === 'owner_admin' ||
+          role === 'regional_admin' ||
+          role === 'district_admin') && (
+          <Card size='lg' width='25vh' variant='outline'>
+            <CardBody>
+              <Center>
+                <Text>1</Text>
+              </Center>
+              <Center>
+                <Text>Farms</Text>
+              </Center>
+            </CardBody>
+          </Card>
+        )}
       </Flex>
     </React.Fragment>
   );

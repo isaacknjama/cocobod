@@ -84,7 +84,6 @@ export const Login: React.FC = () => {
         } else {
           localStorage.removeItem('rememberMe');
         }
-
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('Email', email);
         localStorage.setItem('role', data.role);
@@ -92,6 +91,7 @@ export const Login: React.FC = () => {
         localStorage.setItem('edited_role', data.edited_role);
         localStorage.setItem('username', data.username);
         localStorage.setItem('stateId', data.stateId);
+        localStorage.setItem('regionId', data.regionId);
       } catch (err: unknown) {
         console.error({ err });
         setError('Invalid username of password');

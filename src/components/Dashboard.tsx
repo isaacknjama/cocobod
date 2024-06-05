@@ -49,7 +49,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Owners', icon: FaUser, url: 'owner-admin' },
   { name: 'Regions', icon: FaLocationArrow, url: 'regional-admin' },
   { name: 'Districts', icon: FaBuilding, url: 'district-admin' },
-  { name: 'Destinations', icon: FaFlag, url: 'destination-user' },
+  { name: 'Farms', icon: FaFlag, url: 'destination-user' },
   { name: 'Settings', icon: FaCog, url: 'settings' },
 ];
 
@@ -92,6 +92,8 @@ interface SidebarProps extends BoxProps {
 }
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+  const role = localStorage.getItem('role');
+
   return (
     <Box
       transition='3s ease'
@@ -115,11 +117,66 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         </Box>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
-      {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon} url={link.url}>
-          {link.name}
-        </NavItem>
-      ))}
+      {LinkItems.map((link) =>
+        role === 'super_admin' &&
+        (link.name === 'Dashboard' ||
+          link.name === 'Owners' ||
+          link.name === 'Settings') ? (
+          <NavItem key={link.name} icon={link.icon} url={link.url}>
+            {link.name}
+          </NavItem>
+        ) : role === 'owner_admin' ? (
+          <NavItem key={link.name} icon={link.icon} url={link.url}>
+            {link.name}
+          </NavItem>
+        ) : role === 'regional_admin' &&
+          (link.name === 'Dashboard' ||
+            link.name === 'Settings' ||
+            link.name === 'Districts' ||
+            link.name === 'Farms') ? (
+          <NavItem key={link.name} icon={link.icon} url={link.url}>
+            {link.name}
+          </NavItem>
+        ) : role === 'district_admin ' &&
+          (link.name === 'Dashboard' ||
+            link.name === 'Farms' ||
+            link.name === 'Settings') ? (
+          <NavItem key={link.name} icon={link.icon} url={link.url}>
+            {link.name}
+          </NavItem>
+        ) : (
+          <></>
+        ),
+      )}
+      {/* <Button
+        gap={3}
+        position="relative"
+        top="67vh"
+        width="26vh"
+        bg="orange.500"
+        _hover={{ background: "red" }}
+        pr={4}
+        onClick={() => {
+          setIsLoading(true);
+          if (localStorage) {
+            localStorage.clear();
+            navigate("/login");
+            toast({ title: "Logged out successfully", status: "success" });
+          } else {
+            navigate("/login");
+          }
+        }}
+      >
+        {isLoading ? (
+          <>
+            <Spinner />
+          </>
+        ) : (
+          <>
+            Sign Out <FaSignOutAlt />
+          </>
+        )}
+      </Button> */}
     </Box>
   );
 };
