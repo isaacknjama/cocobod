@@ -66,10 +66,7 @@ export const Login: React.FC = () => {
           throw new Error(data.message || 'Login failed');
         }
 
-        if (
-          data.access_token !== undefined &&
-          data.reset_initial_password === false
-        ) {
+        if (data.access_token && data.reset_initial_password === false) {
           navigate('/change-password');
         } else if (data.access_token !== undefined) {
           toast({ title: 'Login successful', status: 'success' });
@@ -252,7 +249,7 @@ export const ChangePassword = () => {
           throw new Error(data.message);
         }
         localStorage.clear();
-        navigate('/login');
+        navigate('/');
       } catch (err: unknown) {
         setError('Invalid username or password');
       }

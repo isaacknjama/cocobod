@@ -120,35 +120,6 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           {link.name}
         </NavItem>
       ))}
-      {/* <Button
-        gap={3}
-        position="relative"
-        top="67vh"
-        width="26vh"
-        bg="orange.500"
-        _hover={{ background: "red" }}
-        pr={4}
-        onClick={() => {
-          setIsLoading(true);
-          if (localStorage) {
-            localStorage.clear();
-            navigate("/login");
-            toast({ title: "Logged out successfully", status: "success" });
-          } else {
-            navigate("/login");
-          }
-        }}
-      >
-        {isLoading ? (
-          <>
-            <Spinner />
-          </>
-        ) : (
-          <>
-            Sign Out <FaSignOutAlt />
-          </>
-        )}
-      </Button> */}
     </Box>
   );
 };
