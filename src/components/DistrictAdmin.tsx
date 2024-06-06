@@ -600,7 +600,7 @@ export const CreateDistrictAdmin = () => {
         </Box> */}
         {role === 'owner_admin' && (
           <Select
-            placeholder='Select option'
+            placeholder='Select region'
             value={regionFilterId}
             required={true}
             onChange={handleFectDistricts}

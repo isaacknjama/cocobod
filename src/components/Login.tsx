@@ -57,7 +57,7 @@ export const Login: React.FC = () => {
         const data = await response.json();
         console.log('Login response data: ', data);
 
-        if (!response.ok) {
+        if (data.status === false) {
           toast({
             title: `${data.message}`,
             status: 'error',
