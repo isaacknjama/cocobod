@@ -14,8 +14,6 @@ import {
   Spinner,
   Table,
   TableContainer,
-  // Tbody,
-  // Td,
   Textarea,
   Th,
   Thead,
@@ -24,6 +22,13 @@ import {
   ChakraProvider,
   Box,
   FormControl,
+  Tbody,
+  Link,
+  Td,
+  Heading,
+  Image,
+  Skeleton,
+  Text,
 } from '@chakra-ui/react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -31,6 +36,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiBaseUrl } from '../core/environment';
 import { format } from 'date-fns';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 export const DestinationUser = () => {
   interface UserData {
@@ -94,6 +100,20 @@ export const DestinationUser = () => {
     message: DestinationUser[];
   }
 
+  interface Farm {
+    farm_name: string;
+    farm_code: string;
+    farm_comment: string;
+    farm_id: string;
+    batch_uuid: string;
+    qr_code: string;
+    farm: [];
+  }
+
+  interface FarmData {
+    message: Farm[];
+  }
+
   const [farmName, setfarmName] = useState('');
   const [farmComment, setfarmComment] = useState('');
   const [districtId, setdistrictId] = useState('');
@@ -116,43 +136,129 @@ export const DestinationUser = () => {
 
   const [districtFilterId, setdistrictFilterId] = useState('');
   const [regionFilterId, setregionFilterId] = useState('');
-  // const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  const [farmId, setFarmId] = useState<string>('');
 
   const [regionData, setRegionData] = useState<RegionData>();
   const [districtData, setDistrictData] = useState<DistrictData>();
   const [destinationUserData, setdestinationUserData] =
     useState<DestinationUserData>();
+  const [farmData, setFarmData] = useState<FarmData | null>();
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
   const toast = useToast();
   const navigate = useNavigate();
 
   const role = localStorage.getItem('role');
 
-  const fetchDestinationUsers = async (value: string) => {
+  console.log(farmId);
+
+  const handleGetFarmBatchInfo = useCallback(async (farmId: string) => {
     try {
       const token = localStorage.getItem('token');
       setIsLoading(true);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/farms/list-farms/${value}`,
+        `${apiBaseUrl}/api/v1/batch/list-farm/batch/${farmId}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         },
       );
+
+      const farmBatch = await response.json();
+      setFarmData(farmBatch);
+
       if (!response.ok) {
         setIsLoading(false);
         throw new Error('Network response was not ok!');
       }
-      const destinationUsers = await response.json();
-      setdestinationUserData(destinationUsers);
-      setIsLoading(false);
     } catch (err) {
-      console.error('Error fetching data: ', err);
-      setIsLoading(false);
-    } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  const fetchDestinationUsers = useCallback(
+    async (value: string) => {
+      try {
+        const token = localStorage.getItem('token');
+        setIsLoading(true);
+        const response = await fetch(
+          `${apiBaseUrl}/api/v1/farms/list-farms/${value}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        if (!response.ok) {
+          setIsLoading(false);
+          throw new Error('Network response was not ok!');
+        }
+        const destinationUsers = await response.json();
+        console.log(destinationUsers);
+        setdestinationUserData(destinationUsers);
+        setIsLoading(false);
+
+        const farmId = destinationUsers.message.map(
+          (farm: { farm_id: number }) => farm.farm_id,
+        );
+        setFarmId(farmId);
+        console.log(farmId);
+        console.log(typeof farmId);
+
+        for (let i = 0; i < farmId.length; i++) {
+          await handleGetFarmBatchInfo(farmId[i]);
+        }
+
+        // await handleGetFarmBatchInfo(farmId[0]);
+      } catch (err) {
+        console.error('Error fetching data: ', err);
+        setIsLoading(false);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [handleGetFarmBatchInfo],
+  );
+
+  const handleCreateFarmBatch = async (
+    event: React.MouseEvent<HTMLButtonElement>,
+    farmId: string,
+  ) => {
+    event.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      setIsLoading(true);
+      const response = await fetch(
+        `${apiBaseUrl}/api/v1/batch/create-farm-batch/${farmId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const farmBatchData = await response.json();
+      setFarmData(farmBatchData);
+      window.location.reload();
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok!');
+      }
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+    }
+  };
+
+  const createBatchHandler = (farmId: string) => {
+    return (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (farmId) {
+        handleCreateFarmBatch(event, farmId);
+      } else {
+        console.error('farmId is undefined');
+      }
+    };
   };
 
   const fetchRegions = async () => {
@@ -255,7 +361,7 @@ export const DestinationUser = () => {
     } else {
       fetchDestinationUsers(localStorage.getItem('districtFilterId')!);
     }
-  }, [role]);
+  }, [fetchDestinationUsers, role]);
 
   useEffect(() => {
     if (role === 'owner_admin') {
@@ -271,7 +377,7 @@ export const DestinationUser = () => {
     } else {
       fetchDestinationUsers(localStorage.getItem('districtId')!);
     }
-  }, [role]);
+  }, [fetchDestinationUsers, role]);
 
   const handleSubmit = useCallback(
     async (ev: React.FormEvent) => {
@@ -427,6 +533,14 @@ export const DestinationUser = () => {
     ],
   );
 
+  const handleToggleRow = async (farmId: number) => {
+    if (expandedRow === farmId) {
+      setExpandedRow(null);
+    } else {
+      setExpandedRow(farmId);
+    }
+  };
+
   return (
     <>
       <div
@@ -453,7 +567,7 @@ export const DestinationUser = () => {
             fontWeight: 600,
           }}
         >
-          Destination Users
+          Farms
         </h1>
         <div style={{ flexGrow: 1 }}></div>
         {role === 'owner_admin' && (
@@ -535,10 +649,10 @@ export const DestinationUser = () => {
                     <Th>Farm ID</Th>
                     <Th>Farm Name</Th>
                     <Th>Farm Code</Th>
-                    <Th>Actions</Th>
+                    <Th>Batch Info</Th>
                   </Tr>
                 </Thead>
-                {/* <Tbody>
+                <Tbody>
                   {destinationUserData?.message.map((data, index) => (
                     <React.Fragment key={index}>
                       <Tr>
@@ -547,27 +661,117 @@ export const DestinationUser = () => {
                         <Td>{data.farm_code}</Td>
                         <Td>
                           <Link
-                            onClick={() => handleToggleRow(data.district_id)}
+                            onClick={() => handleToggleRow(data.farm_id)}
                             _hover={{
                               color: 'yellow.500',
                             }}
                             textDecoration='underline'
                           >
-                            {expandedRow === data.district_id ? (
+                            {expandedRow === data.farm_id ? (
                               <div style={{ display: 'flex' }}>
-                                <FiChevronUp /> Hide Region Admins
+                                <FiChevronUp />
                               </div>
                             ) : (
                               <div style={{ display: 'flex' }}>
-                                <FiChevronDown /> See Region Admins
+                                <FiChevronDown />
                               </div>
                             )}
                           </Link>
                         </Td>
                       </Tr>
+                      {expandedRow === data.farm_id && (
+                        <Tr>
+                          <Td colSpan={6}>
+                            {farmData ? (
+                              <Table variant='simple' size='sm' mt={2}>
+                                <Thead>
+                                  <Tr>
+                                    <Th>
+                                      <Heading size='s'>Batch UUID</Heading>
+                                    </Th>
+                                    <Th>
+                                      <Heading size='s'>QR Code</Heading>
+                                    </Th>
+                                  </Tr>
+                                </Thead>
+                                <Tbody>
+                                  {farmData.message.map((farm) => (
+                                    <Tr key={farm.farm_id}>
+                                      {farm.batch_uuid === '' ? (
+                                        <Td>
+                                          <Button
+                                            onClick={() =>
+                                              createBatchHandler(farm.farm_id)
+                                            }
+                                          >
+                                            Generate Batch
+                                          </Button>
+                                        </Td>
+                                      ) : (
+                                        <>
+                                          {isLoading ? (
+                                            <Td colSpan={2}>
+                                              <Skeleton />
+                                            </Td>
+                                          ) : (
+                                            <>
+                                              <Td>
+                                                <Text fontSize='lg'>
+                                                  {farm.batch_uuid}
+                                                </Text>
+                                              </Td>
+                                              <Td>
+                                                <Image
+                                                  width='20vh'
+                                                  src={farm.qr_code}
+                                                  alt='QR Code'
+                                                />
+                                              </Td>
+                                            </>
+                                          )}
+                                        </>
+                                      )}
+                                    </Tr>
+                                  ))}
+                                  {/* {farmData.message.batch_uuid === '' ? (
+                                    <Button
+                                      onClick={createBatchHandler(data.farm_id)}
+                                    >
+                                      Generate Batch
+                                    </Button>
+                                  ) : (
+                                    <Tr key={`${farmData.message.batch_uuid}`}>
+                                      {isLoading ? (
+                                        <Skeleton />
+                                      ) : (
+                                        <React.Fragment>
+                                          <Td>
+                                            <Text fontSize='lg'>
+                                              {farmData.message.batch_uuid}
+                                            </Text>
+                                          </Td>
+                                          <Td>
+                                            <Image
+                                              width='20vh'
+                                              src={farmData.message.qr_code}
+                                              alt='QR Code'
+                                            />
+                                          </Td>
+                                        </React.Fragment>
+                                      )}
+                                    </Tr>
+                                  )} */}
+                                </Tbody>
+                              </Table>
+                            ) : (
+                              <Spinner size='lg' color='green.500' />
+                            )}
+                          </Td>
+                        </Tr>
+                      )}
                     </React.Fragment>
                   ))}
-                </Tbody> */}
+                </Tbody>
               </Table>
             </TableContainer>
           </>
