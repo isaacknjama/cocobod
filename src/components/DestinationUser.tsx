@@ -14,8 +14,8 @@ import {
   Spinner,
   Table,
   TableContainer,
-  Tbody,
-  Td,
+  // Tbody,
+  // Td,
   Textarea,
   Th,
   Thead,
@@ -33,24 +33,6 @@ import { apiBaseUrl } from '../core/environment';
 import { format } from 'date-fns';
 
 export const DestinationUser = () => {
-  interface Owner {
-    owner_id: number;
-    owner_name: string;
-    owner_code: string;
-    batch_code_length: number;
-    owner_logo: string;
-    allow_incident_tracking: string;
-    include_district: string;
-    include_region: string;
-    owner_comment: string;
-    owner_description: string;
-    serialise_codes: string;
-  }
-
-  interface OwnerData {
-    message: Owner[];
-  }
-
   interface UserData {
     id: number;
     password: string;
@@ -73,41 +55,38 @@ export const DestinationUser = () => {
     user_permissions: [];
   }
 
-  interface RegionalAdmin {
-    region_id: number;
-    region_name: string;
-    region_code: string;
-    region_comment: string;
-    user: UserData;
-    owner_name: string;
-    owner: number;
-  }
-
-  interface RegionalAdminData {
-    message: RegionalAdmin[];
-  }
-
-  interface DistrictAdmin {
+  interface District {
     district_id: number;
     district_name: string;
     district_code: string;
     district_comment: string;
-    owner: Owner;
     user: UserData;
   }
 
-  interface DistrictAdminData {
-    message: DistrictAdmin[];
+  interface DistrictData {
+    message: District[];
+  }
+
+  interface Region {
+    region_id: number;
+    region_name: string;
+    region_code: string;
+    region_comment: string;
+    state: number;
+  }
+
+  interface RegionData {
+    message: Region[];
   }
 
   interface DestinationUser {
-    region: RegionalAdmin;
-    owner: Owner;
-    district: DistrictAdmin;
-    destination_id: number;
-    destination_name: string;
-    destination_comment: string;
-    destination_code: string;
+    district: number;
+    farm_code: string;
+    farm_comment: string;
+    farm_id: number;
+    farm_name: string;
+    region: number;
+    state: number;
     user: UserData;
   }
 
@@ -115,15 +94,10 @@ export const DestinationUser = () => {
     message: DestinationUser[];
   }
 
-  const [destinationName, setdestinationName] = useState('');
-  const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [destinationComment, setdestinationComment] = useState('');
-  const [destinationCode, setdestinationCode] = useState('');
-  const [ownerAdminId, setOwnerAdminId] = useState('');
-  const [districtAdmin, setdistrictAdmin] = useState('');
-  const [regionalAdmin, setregionalAdmin] = useState('');
+  const [farmName, setfarmName] = useState('');
+  const [farmComment, setfarmComment] = useState('');
+  const [districtId, setdistrictId] = useState('');
+  const [regionId, setregionId] = useState('');
 
   const [productName, setproductName] = useState('');
   const [brand, setbrand] = useState('');
@@ -140,27 +114,26 @@ export const DestinationUser = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isIncidenceOpen, setIsIncidenceOpen] = useState(false);
 
-  const [isSuspendOpen, setSuspendIsOpen] = useState(false);
-  const [isReactivateOpen, setReactivateIsOpen] = useState(false);
-  const [currentId, setCurrentId] = useState<number>();
+  const [districtFilterId, setdistrictFilterId] = useState('');
+  const [regionFilterId, setregionFilterId] = useState('');
+  // const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
-  const [ownerData, setOwnerData] = useState<OwnerData>();
-  const [regionalAdminData, setRegionalAdminData] =
-    useState<RegionalAdminData>();
-  const [districtAdminData, setDistrictAdminData] =
-    useState<DistrictAdminData>();
+  const [regionData, setRegionData] = useState<RegionData>();
+  const [districtData, setDistrictData] = useState<DistrictData>();
   const [destinationUserData, setdestinationUserData] =
     useState<DestinationUserData>();
 
   const toast = useToast();
   const navigate = useNavigate();
 
-  const fetchDestinationUsers = async () => {
+  const role = localStorage.getItem('role');
+
+  const fetchDestinationUsers = async (value: string) => {
     try {
       const token = localStorage.getItem('token');
       setIsLoading(true);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/destination/list-all-destination-user/`,
+        `${apiBaseUrl}/api/v1/farms/list-farms/${value}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -182,12 +155,13 @@ export const DestinationUser = () => {
     }
   };
 
-  const fetchOwners = async () => {
+  const fetchRegions = async () => {
     try {
       const token = localStorage.getItem('token');
+      const id = localStorage.getItem('stateId');
       setIsLoading(true);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/owner/list-all-owners/`,
+        `${apiBaseUrl}/api/v1/regions/list-all-regions/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -198,34 +172,10 @@ export const DestinationUser = () => {
         setIsLoading(false);
         throw new Error('Network response was not ok!');
       }
-      const owners = await response.json();
-      setOwnerData(owners);
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Error fetching data: ', err);
-      setIsLoading(false);
-    }
-  };
-
-  const fetchRegionalAdmins = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const id = localStorage.getItem('id');
-      setIsLoading(true);
-      const response = await fetch(
-        `${apiBaseUrl}/api/v1/regions/list-all-region-owners/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        setIsLoading(false);
-        throw new Error('Network response was not ok!');
-      }
-      const regionalAdmins = await response.json();
-      setRegionalAdminData(regionalAdmins);
+      const regions = await response.json();
+      localStorage.setItem('regionFilterId', regions.message[0].region_id);
+      setregionFilterId(regions.message[0].region_id);
+      setRegionData(regions);
       setIsLoading(false);
     } catch (err) {
       console.error('Error fetching data: ', err);
@@ -235,12 +185,12 @@ export const DestinationUser = () => {
     }
   };
 
-  const fetchDistrictAdmins = async () => {
+  const fetchDistricts = async (value: string) => {
     try {
       const token = localStorage.getItem('token');
       setIsLoading(true);
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/district/list-all-district-user/`,
+        `${apiBaseUrl}/api/v1/district/list-all-districts/${value}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -251,8 +201,13 @@ export const DestinationUser = () => {
         setIsLoading(false);
         throw new Error('Network response was not ok!');
       }
-      const districtAdmins = await response.json();
-      setDistrictAdminData(districtAdmins);
+      const districts = await response.json();
+      localStorage.setItem(
+        'districtFilterId',
+        districts.message[0].district_id,
+      );
+      setdistrictFilterId(districts.message[0].district_id);
+      setDistrictData(districts);
       setIsLoading(false);
     } catch (err) {
       console.error('Error fetching data: ', err);
@@ -260,13 +215,32 @@ export const DestinationUser = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleFectDistricts = async (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setregionFilterId(event.target.value);
+    await fetchDistricts(event.target.value);
+    await fetchDestinationUsers(localStorage.getItem('districtFilterId')!);
+  };
+
+  const handleFectFarms = async (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setdistrictFilterId(event.target.value);
+    await fetchDestinationUsers(event.target.value);
+  };
+
+  const handleFectDistrictsModal = async (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setregionId(event.target.value);
+    await fetchDistricts(event.target.value);
   };
 
   const openModal = () => {
     setIsOpen(true);
-    fetchOwners();
-    fetchRegionalAdmins();
-    fetchDistrictAdmins();
   };
 
   const openIncidentModal = () => {
@@ -275,15 +249,29 @@ export const DestinationUser = () => {
 
   const closeModal = useCallback(() => {
     setIsOpen(false);
-    setSuspendIsOpen(false);
-    setReactivateIsOpen(false);
     setIsIncidenceOpen(false);
-    fetchDestinationUsers();
-  }, []);
+    if (role === 'district_admin') {
+      fetchDestinationUsers(localStorage.getItem('districtId')!);
+    } else {
+      fetchDestinationUsers(localStorage.getItem('districtFilterId')!);
+    }
+  }, [role]);
 
   useEffect(() => {
-    fetchDestinationUsers();
-  }, []);
+    if (role === 'owner_admin') {
+      fetchRegions().then(() => {
+        fetchDistricts(localStorage.getItem('regionFilterId')!).then(() => {
+          fetchDestinationUsers(localStorage.getItem('districtFilterId')!);
+        });
+      });
+    } else if (role === 'regional_admin') {
+      fetchDistricts(localStorage.getItem('regionId')!).then(() => {
+        fetchDestinationUsers(localStorage.getItem('districtFilterId')!);
+      });
+    } else {
+      fetchDestinationUsers(localStorage.getItem('districtId')!);
+    }
+  }, [role]);
 
   const handleSubmit = useCallback(
     async (ev: React.FormEvent) => {
@@ -293,18 +281,25 @@ export const DestinationUser = () => {
         const token = localStorage.getItem('token');
         const formData = new FormData();
 
-        formData.append('destinationName', destinationName);
-        formData.append('email', email);
-        formData.append('firstName', firstName);
-        formData.append('lastName', lastName);
-        formData.append('destinationComment', destinationComment);
-        formData.append('destinationCode', destinationCode);
-        formData.append('ownerAdminId', ownerAdminId);
-        formData.append('regionalAdmin', regionalAdmin);
-        formData.append('districtAdmin', districtAdmin);
+        formData.append('farmName', farmName);
+        formData.append('stateId', localStorage.getItem('stateId')!);
+
+        if (role == 'owner_admin') {
+          formData.append('regionId', regionId);
+        } else {
+          formData.append('regionId', localStorage.getItem('regionId')!);
+        }
+
+        if (role == 'owner_admin' || role == 'regional_admin') {
+          formData.append('districtId', districtId);
+        } else {
+          formData.append('districtId', localStorage.getItem('districtId')!);
+        }
+
+        formData.append('farmComment', farmComment);
 
         const response = await fetch(
-          `${apiBaseUrl}/api/v1/destination/create-destination-user/`,
+          `${apiBaseUrl}/api/v1/farms/create-farm/`,
           {
             method: 'POST',
             headers: {
@@ -330,7 +325,7 @@ export const DestinationUser = () => {
             isClosable: true,
           });
           closeModal();
-          navigate('/dashboard/create-destination-user');
+          navigate('/dashboard/destination-user');
           setIsLoading(false);
         }
       } catch (err: unknown) {
@@ -343,16 +338,12 @@ export const DestinationUser = () => {
       }
     },
     [
-      destinationName,
-      email,
-      firstName,
-      lastName,
-      destinationComment,
-      destinationCode,
-      ownerAdminId,
-      regionalAdmin,
-      districtAdmin,
+      farmName,
+      farmComment,
+      regionId,
+      districtId,
       toast,
+      role,
       closeModal,
       navigate,
     ],
@@ -436,66 +427,6 @@ export const DestinationUser = () => {
     ],
   );
 
-  const openReactivateModal = (id: number) => {
-    setCurrentId(id);
-    setReactivateIsOpen(true);
-  };
-
-  const reactivate = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      setIsLoading(true);
-      const response = await fetch(
-        `${apiBaseUrl}/api/v1/destination/reactivate-destination-user/${currentId}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        setIsLoading(false);
-        throw new Error('Network response was not ok!');
-      }
-    } catch (err) {
-      console.error('Error fetching data: ', err);
-      setIsLoading(false);
-    } finally {
-      setIsLoading(false);
-      closeModal();
-    }
-  };
-
-  const openSuspendModal = (id: number) => {
-    setCurrentId(id);
-    setSuspendIsOpen(true);
-  };
-
-  const suspend = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      setIsLoading(true);
-      const response = await fetch(
-        `${apiBaseUrl}/api/v1/destination/suspend-destination-user/${currentId}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        setIsLoading(false);
-        throw new Error('Network response was not ok!');
-      }
-    } catch (err) {
-      console.error('Error fetching data: ', err);
-      setIsLoading(false);
-    } finally {
-      setIsLoading(false);
-      closeModal();
-    }
-  };
-
   return (
     <>
       <div
@@ -525,6 +456,36 @@ export const DestinationUser = () => {
           Destination Users
         </h1>
         <div style={{ flexGrow: 1 }}></div>
+        {role === 'owner_admin' && (
+          <Select
+            placeholder='Select Region'
+            value={regionFilterId}
+            required={true}
+            onChange={handleFectDistricts}
+            mr={2}
+          >
+            {regionData?.message.map((item, index) => (
+              <option key={index} value={item.region_id}>
+                {item.region_name}
+              </option>
+            ))}
+          </Select>
+        )}
+        {(role === 'owner_admin' || role === 'regional_admin') && (
+          <Select
+            placeholder='Select District'
+            value={districtFilterId}
+            required={true}
+            onChange={handleFectFarms}
+            mr={2}
+          >
+            {districtData?.message.map((item, index) => (
+              <option key={index} value={item.district_id}>
+                {item.district_name}
+              </option>
+            ))}
+          </Select>
+        )}
         <Button
           type='submit'
           bg='yellow.500'
@@ -548,7 +509,7 @@ export const DestinationUser = () => {
           }}
           onClick={openModal}
         >
-          Add Destination User
+          Add Farm
         </Button>
       </div>
 
@@ -571,57 +532,42 @@ export const DestinationUser = () => {
               >
                 <Thead>
                   <Tr>
-                    <Th>Destination ID</Th>
-                    <Th>Destination Name</Th>
-                    <Th>Destination Code</Th>
-                    <Th>Region Name</Th>
-                    <Th>Owner Name</Th>
-                    <Th>District Name</Th>
+                    <Th>Farm ID</Th>
+                    <Th>Farm Name</Th>
+                    <Th>Farm Code</Th>
                     <Th>Actions</Th>
                   </Tr>
                 </Thead>
-                <Tbody>
+                {/* <Tbody>
                   {destinationUserData?.message.map((data, index) => (
                     <React.Fragment key={index}>
                       <Tr>
-                        <Td>{data.destination_id}</Td>
-                        <Td>{data.destination_name}</Td>
-                        <Td>{data.destination_code}</Td>
-                        <Td>{data.region.region_name}</Td>
-                        <Td>{data.owner.owner_name}</Td>
-                        <Td>{data.district.district_name}</Td>
+                        <Td>{data.farm_id}</Td>
+                        <Td>{data.farm_name}</Td>
+                        <Td>{data.farm_code}</Td>
                         <Td>
-                          {data.user.status === 2 && (
-                            <Button
-                              type='submit'
-                              bg='yellow.500'
-                              color={'white'}
-                              _hover={{
-                                background: 'yellow.300',
-                              }}
-                              onClick={() => openReactivateModal(data.user.id)}
-                            >
-                              Reactivate
-                            </Button>
-                          )}
-                          {data.user.status === 1 && (
-                            <Button
-                              color='yellow.500'
-                              _hover={{
-                                background: 'yellow.500',
-                                color: 'white',
-                              }}
-                              variant='ghost'
-                              onClick={() => openSuspendModal(data.user.id)}
-                            >
-                              Suspend
-                            </Button>
-                          )}
+                          <Link
+                            onClick={() => handleToggleRow(data.district_id)}
+                            _hover={{
+                              color: 'yellow.500',
+                            }}
+                            textDecoration='underline'
+                          >
+                            {expandedRow === data.district_id ? (
+                              <div style={{ display: 'flex' }}>
+                                <FiChevronUp /> Hide Region Admins
+                              </div>
+                            ) : (
+                              <div style={{ display: 'flex' }}>
+                                <FiChevronDown /> See Region Admins
+                              </div>
+                            )}
+                          </Link>
                         </Td>
                       </Tr>
                     </React.Fragment>
                   ))}
-                </Tbody>
+                </Tbody> */}
               </Table>
             </TableContainer>
           </>
@@ -635,7 +581,7 @@ export const DestinationUser = () => {
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Add Destination User</ModalHeader>
+          <ModalHeader>Add Farm</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <form
@@ -649,102 +595,58 @@ export const DestinationUser = () => {
               }}
               encType='multipart/form-data'
             >
-              <FormLabel>Destination Name</FormLabel>
+              <FormLabel>Farm Name</FormLabel>
               <Input
                 type='text'
-                value={destinationName}
+                value={farmName}
                 required={true}
-                onChange={(ev) => setdestinationName(ev.currentTarget.value)}
+                onChange={(ev) => setfarmName(ev.currentTarget.value)}
                 mb={3}
               />
 
-              <FormLabel>Email Address</FormLabel>
-              <Input
-                type='email'
-                value={email}
-                required={true}
-                onChange={(ev) => setEmail(ev.currentTarget.value)}
-                placeholder='example@xyz.com'
-                mb={3}
-              />
+              {role === 'owner_admin' && (
+                <>
+                  <FormLabel>Region</FormLabel>
+                  <Select
+                    placeholder='Select option'
+                    value={regionId || ''}
+                    required={true}
+                    onChange={handleFectDistrictsModal}
+                    mb={3}
+                  >
+                    {regionData?.message.map((item, index) => (
+                      <option key={index} value={item.region_id}>
+                        {item.region_name}
+                      </option>
+                    ))}
+                  </Select>
+                </>
+              )}
 
-              <FormLabel>First Name</FormLabel>
-              <Input
-                type='text'
-                value={firstName}
-                required={true}
-                onChange={(ev) => setFirstName(ev.currentTarget.value)}
-                mb={3}
-              />
+              {(role === 'owner_admin' || role === 'regional_admin') && (
+                <>
+                  <FormLabel>District</FormLabel>
+                  <Select
+                    placeholder='Select option'
+                    value={districtId || ''}
+                    required={true}
+                    onChange={(ev) => setdistrictId(ev.currentTarget.value)}
+                    mb={3}
+                  >
+                    {districtData?.message.map((item, index) => (
+                      <option key={index} value={item.district_id}>
+                        {item.district_name}
+                      </option>
+                    ))}
+                  </Select>
+                </>
+              )}
 
-              <FormLabel>Last Name</FormLabel>
-              <Input
-                type='text'
-                value={lastName}
-                required={true}
-                onChange={(ev) => setLastName(ev.currentTarget.value)}
-                mb={3}
-              />
-
-              <FormLabel>Destination Code</FormLabel>
-              <Input
-                type='text'
-                value={destinationCode}
-                required={true}
-                onChange={(ev) => setdestinationCode(ev.currentTarget.value)}
-                mb={3}
-              />
-
-              <FormLabel>Owner Admin</FormLabel>
-              <Select
-                placeholder='Select option'
-                value={ownerAdminId || ''}
-                required={true}
-                onChange={(ev) => setOwnerAdminId(ev.currentTarget.value)}
-                mb={3}
-              >
-                {ownerData?.message.map((item, index) => (
-                  <option key={index} value={item.owner_id}>
-                    {item.owner_name}
-                  </option>
-                ))}
-              </Select>
-
-              <FormLabel>Regional Admin</FormLabel>
-              <Select
-                placeholder='Select option'
-                value={regionalAdmin || ''}
-                required={true}
-                onChange={(ev) => setregionalAdmin(ev.currentTarget.value)}
-                mb={3}
-              >
-                {regionalAdminData?.message.map((item, index) => (
-                  <option key={index} value={item.region_id}>
-                    {item.region_name}
-                  </option>
-                ))}
-              </Select>
-
-              <FormLabel>District Admin</FormLabel>
-              <Select
-                placeholder='Select option'
-                value={districtAdmin || ''}
-                required={true}
-                onChange={(ev) => setdistrictAdmin(ev.currentTarget.value)}
-                mb={3}
-              >
-                {districtAdminData?.message.map((item, index) => (
-                  <option key={index} value={item.district_id}>
-                    {item.district_name}
-                  </option>
-                ))}
-              </Select>
-
-              <FormLabel>Destination Comment</FormLabel>
+              <FormLabel>Farm Comment</FormLabel>
               <Textarea
                 required={true}
-                value={destinationComment}
-                onChange={(ev) => setdestinationComment(ev.currentTarget.value)}
+                value={farmComment}
+                onChange={(ev) => setfarmComment(ev.currentTarget.value)}
                 mb={3}
               />
 
@@ -773,84 +675,6 @@ export const DestinationUser = () => {
               _hover={{
                 background: 'yellow.500',
                 color: 'white',
-              }}
-              variant='ghost'
-              onClick={closeModal}
-            >
-              Close
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <Modal isOpen={isSuspendOpen} onClose={closeModal}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Suspend Destination User</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            Are you you want to suspend this Destination User?
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              type='submit'
-              bg='yellow.500'
-              color={'white'}
-              _hover={{
-                background: 'yellow.300',
-              }}
-              isLoading={isLoading}
-              loadingText='Suspending'
-              onClick={suspend}
-            >
-              Suspend
-            </Button>
-            <Button
-              color='yellow.500'
-              _hover={{
-                background: 'yellow.500',
-                color: 'white',
-              }}
-              style={{
-                marginLeft: 4,
-              }}
-              variant='ghost'
-              onClick={closeModal}
-            >
-              Close
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <Modal isOpen={isReactivateOpen} onClose={closeModal}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Reactivate Destination User</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            Are you you want to reactivate this Destination User?
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              type='submit'
-              bg='yellow.500'
-              color={'white'}
-              _hover={{
-                background: 'yellow.300',
-              }}
-              isLoading={isLoading}
-              onClick={reactivate}
-              loadingText='Reactivating'
-            >
-              Reactivate
-            </Button>
-            <Button
-              color='yellow.500'
-              _hover={{
-                background: 'yellow.500',
-                color: 'white',
-              }}
-              style={{
-                marginLeft: 4,
               }}
               variant='ghost'
               onClick={closeModal}
