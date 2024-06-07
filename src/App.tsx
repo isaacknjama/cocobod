@@ -15,6 +15,7 @@ import {
   DashboardStatistics,
   DestinationUser,
   CreateState,
+  ReportIncidence,
 } from './components/index';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path='/forgot-password' element={<ForgotPassword />} />
         <Route path='/verify-otp' element={<VerifyOtp />} />
         <Route path='/reset-password' element={<ResetPassword />} />
+        <Route path='/report-incident' element={<ReportIncidence />} />
         <Route
           path='/dashboard'
           element={

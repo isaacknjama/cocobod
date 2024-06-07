@@ -4,3 +4,4 @@ export { CreateRegionalAdmin } from './RegionalAdmin';
 export { DestinationUser } from './DestinationUser';
 export { DashboardStatistics } from './DashboardStatistics';
 export { CreateState } from './State';
+export { ReportIncidence } from './ReportIncident';

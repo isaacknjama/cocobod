@@ -91,6 +91,7 @@ export const Login: React.FC = () => {
         localStorage.setItem('edited_role', data.edited_role);
         localStorage.setItem('username', data.username);
         localStorage.setItem('stateId', data.stateId);
+        localStorage.setItem('districtId', data.districtId);
         localStorage.setItem('regionId', data.regionId);
       } catch (err: unknown) {
         console.error({ err });
